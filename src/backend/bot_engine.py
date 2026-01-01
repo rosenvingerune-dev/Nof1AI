@@ -461,6 +461,12 @@ class TradingBotEngine:
                         confidence = decision.get('confidence', 75.0)
 
                         if action in ['buy', 'sell']:
+                            # Apply Risk Management Logic
+                            max_pos_size = float(CONFIG.get('max_position_size', 1000))
+                            if allocation > max_pos_size:
+                                self.logger.warning(f"Risk Control: Capping {asset} allocation from ${allocation:.2f} to ${max_pos_size:.2f}")
+                                allocation = max_pos_size
+
                             # MANUAL MODE: Create proposal instead of executing
                             if self.trading_mode == "manual":
                                 try:

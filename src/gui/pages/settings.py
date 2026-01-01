@@ -35,9 +35,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
             'strategy': {
                 'assets': CONFIG.get('assets') or 'BTC ETH',
                 'interval': CONFIG.get('interval') or '5m',
-                'llm_model': CONFIG.get('llm_model') or 'x-ai/grok-4',
-                'reasoning_enabled': CONFIG.get('reasoning_enabled', False),
-                'reasoning_effort': CONFIG.get('reasoning_effort') or 'high'
+                'llm_model': CONFIG.get('llm_model') or 'gemini-1.5-flash',
             },
             'api_keys': {
                 'taapi_api_key': CONFIG.get('taapi_api_key') or '',
@@ -115,10 +113,8 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     llm_model_select = ui.select(
                         label='Model',
                         options=[
-                            'x-ai/grok-4',
-                            'openai/gpt-4',
-                            'anthropic/claude-3.5-sonnet',
-                            'deepseek/deepseek-chat-v3.1'
+                            'gemini-1.5-flash',
+                            'gemini-1.5-pro'
                         ],
                         value=config_data['strategy']['llm_model']
                     ).classes('w-full')
@@ -126,19 +122,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
 
                     ui.separator()
 
-                    # Reasoning configuration
-                    with ui.row().classes('items-center gap-4'):
-                        reasoning_enabled = ui.checkbox(
-                            'Enable Reasoning Tokens',
-                            value=config_data['strategy']['reasoning_enabled']
-                        )
-                        ui.label('Use extended reasoning for better decisions').classes('text-sm text-gray-400')
 
-                    reasoning_effort = ui.select(
-                        label='Reasoning Effort',
-                        options=['low', 'medium', 'high'],
-                        value=config_data['strategy']['reasoning_effort']
-                    ).classes('w-full')
 
                     ui.separator()
 
@@ -149,8 +133,6 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                             config_data['strategy']['assets'] = assets_input.value
                             config_data['strategy']['interval'] = interval_select.value
                             config_data['strategy']['llm_model'] = llm_model_select.value
-                            config_data['strategy']['reasoning_enabled'] = reasoning_enabled.value
-                            config_data['strategy']['reasoning_effort'] = reasoning_effort.value
 
                             # Save to file
                             if save_config(config_data):
@@ -173,8 +155,6 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                             assets_input.value = loaded_config['strategy']['assets']
                             interval_select.value = loaded_config['strategy']['interval']
                             llm_model_select.value = loaded_config['strategy']['llm_model']
-                            reasoning_enabled.value = loaded_config['strategy']['reasoning_enabled']
-                            reasoning_effort.value = loaded_config['strategy']['reasoning_effort']
                             ui.notify('Configuration loaded successfully!', type='positive')
                         except Exception as e:
                             ui.notify(f'Error loading config: {str(e)}', type='negative')
@@ -405,6 +385,10 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
 
                             # Save to file
                             if save_config(config_data):
+                                # Update bot service
+                                bot_service.update_config({
+                                    'max_position_size': config_data['risk_management']['max_position_size']
+                                })
                                 ui.notify('Risk management settings saved successfully!', type='positive')
                             else:
                                 ui.notify('Failed to save risk settings', type='negative')

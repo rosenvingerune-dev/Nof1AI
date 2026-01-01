@@ -96,8 +96,15 @@ class GeminiTradingAgent:
             "- Output a STRICT JSON object with exactly two properties in this order:\n"
             "  • reasoning: detailed but concise string (max 4000 chars) capturing key analysis. Do not write a novel.\n"
             "  • trade_decisions: array ordered to match the provided assets list.\n"
-            "- Each item inside trade_decisions must contain the keys {asset, action, allocation_usd, tp_price, sl_price, exit_plan, rationale}.\n"
+            "- Each item inside trade_decisions must contain the keys {asset, action, confidence, allocation_usd, tp_price, sl_price, exit_plan, rationale}.\n"
+            "- 'confidence' must be a number between 0 and 100 representing your conviction level (see policy below).\n"
             "- Do not emit Markdown or any extra properties.\n"
+            "\n"
+            "Confidence Scoring Policy:\n"
+            "- 0-50: Weak/Conflicting signals. Prefer HOLD.\n"
+            "- 51-75: Moderate setup. Valid trigger but missing timeframe alignment or indicator confluence.\n"
+            "- 76-90: Strong setup. 5m and 4h aligned, Momentum supporting, acceptable risk.\n"
+            "- 91-100: A+ Setup. All systems go (Trend + Momentum + Volatility + Fundamentals). Aggressive entry.\n"
         )
 
         # Define function/tool for TAAPI indicator fetching
@@ -265,7 +272,9 @@ class GeminiTradingAgent:
                         item.setdefault("tp_price", None)
                         item.setdefault("sl_price", None)
                         item.setdefault("exit_plan", "")
+                        item.setdefault("exit_plan", "")
                         item.setdefault("rationale", "")
+                        item.setdefault("confidence", 0.0)
                         normalized.append(item)
                 return {"reasoning": reasoning_text, "trade_decisions": normalized}
 
@@ -293,9 +302,10 @@ class GeminiTradingAgent:
                             "tp_price": {"type": "number"},
                             "sl_price": {"type": "number"},
                             "exit_plan": {"type": "string"},
+                            "confidence": {"type": "number"},
                             "rationale": {"type": "string"},
                         },
-                        "required": ["asset", "action", "allocation_usd", "exit_plan", "rationale"]
+                        "required": ["asset", "action", "confidence", "allocation_usd", "exit_plan", "rationale"]
                     }
                 }
             },
@@ -313,6 +323,8 @@ class GeminiTradingAgent:
                 "tp_price": None,
                 "sl_price": None,
                 "exit_plan": "",
+                "exit_plan": "",
+                "confidence": 0.0,
                 "rationale": "API error - defaulting to HOLD"
             } for a in assets]
         }

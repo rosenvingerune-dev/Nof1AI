@@ -52,3 +52,12 @@ Systemet fremstår nå som en helhetlig trading-plattform hvor:
   - La til Tooltip på 'Error'-merket for enklere feilsøking.
   - Sørget for at feilmeldinger ('Error') forsvinner automatisk når neste runde kjører feilfritt.
 
+
+### Oppdatering - Fase 2: Confidence & Risk Sikring (v1.02)
+- **Settings:** Ryddet opp i GUI. Fjernet 'Grok/OpenAI' og 'Reasoning Tokens' som ikke støttes. La til Gemini Flash/Pro valg.
+- **Risk Management:** Implementerte hard sperre (max_position_size) i ot_engine.py. Boten overstyrer nå AI-en hvis den foreslår for store beløp. Risikoinnstillinger oppdateres nå umiddelbart uten restart.
+- **AI Logic / Confidence:**
+  - Oppdaterte JSON Schema i gemini_decision_maker.py til å inkludere obligatorisk confidence (0-100).
+  - Oppdaterte System Prompt med regler for poengsetting (0-50: Weak, 51-75: Moderate, 76-90: Strong, 91-100: A+).
+- **Docker/Plan:** Opprettet VURDERING_OG_PLAN.md med strategi for Containerisering og Autotrading.
+

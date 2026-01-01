@@ -1,0 +1,5 @@
+C:\Users\Rune\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\google\api_core\_python_version_support.py:266: FutureWarning: You are using a Python version (3.10.11) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+NiceGUI ready to go on http://127.0.0.1:8081
+ERROR:    [Errno 10048] error while attempting to bind on address ('127.0.0.1', 8081): bare ett bruk av hver enkelt kontaktadresse (protokoll/nettverk adresse/port) er vanligvis tillatt
+[INFO] NiceGUI app shutdown event triggered
