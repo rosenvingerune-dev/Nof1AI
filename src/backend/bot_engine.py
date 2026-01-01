@@ -467,13 +467,20 @@ class TradingBotEngine:
                                 self.logger.warning(f"Risk Control: Capping {asset} allocation from ${allocation:.2f} to ${max_pos_size:.2f}")
                                 allocation = max_pos_size
 
-                            # MANUAL MODE: Create proposal instead of executing
-                            if self.trading_mode == "manual":
+                            # AUTO-TRADE LOGIC
+                            auto_trade_enabled = CONFIG.get('auto_trade_enabled', False)
+                            auto_threshold = float(CONFIG.get('auto_trade_threshold', 80))
+                            
+                            should_auto = (self.trading_mode == "auto")
+                            if not should_auto and auto_trade_enabled and confidence >= auto_threshold:
+                                should_auto = True
+                                self.logger.info(f"Auto-Trade Triggered: Confidence {confidence}% >= {auto_threshold}%")
+
+                            # MANUAL MODE / LOW CONFIDENCE: Create proposal instead of executing
+                            if not should_auto:
                                 try:
                                     current_price = await self.exchange.get_current_price(asset)
                                     size = allocation / current_price if current_price > 0 else 0
-                                    
-                                    # Calculate risk/reward
                                     risk_reward = None
                                     if tp_price and sl_price and current_price:
                                         potential_gain = abs(tp_price - current_price) / current_price

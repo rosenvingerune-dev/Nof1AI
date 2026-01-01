@@ -36,6 +36,8 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                 'assets': CONFIG.get('assets') or 'BTC ETH',
                 'interval': CONFIG.get('interval') or '5m',
                 'llm_model': CONFIG.get('llm_model') or 'gemini-1.5-flash',
+                'auto_trade_enabled': CONFIG.get('auto_trade_enabled', False),
+                'auto_trade_threshold': CONFIG.get('auto_trade_threshold', 80)
             },
             'api_keys': {
                 'taapi_api_key': CONFIG.get('taapi_api_key') or '',
@@ -91,7 +93,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     assets_input = ui.textarea(
                         label='Assets (comma-separated)',
                         placeholder='BTC, ETH, SOL',
-                        value=config_data['strategy']['assets']
+                        value=config_data['strategy'].get('assets', 'BTC, ETH')
                     ).classes('w-full')
                     ui.label('Example: BTC, ETH, SOL or BTC ETH SOL').classes('text-xs text-gray-400')
 
@@ -102,7 +104,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     interval_select = ui.select(
                         label='Interval',
                         options=['1m', '5m', '15m', '1h', '4h'],
-                        value=config_data['strategy']['interval']
+                        value=config_data['strategy'].get('interval', '5m')
                     ).classes('w-full')
                     ui.label('Timeframe for trading decisions').classes('text-xs text-gray-400')
 
@@ -110,19 +112,43 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
 
                     # LLM Model selection
                     ui.label('LLM Model').classes('text-lg font-semibold text-white')
+                    llm_model_options = [
+                        'gemini-1.5-flash',
+                        'gemini-1.5-pro'
+                    ]
+                    current_model = config_data['strategy'].get('llm_model', 'gemini-1.5-flash')
+                    if current_model not in llm_model_options:
+                        current_model = 'gemini-1.5-flash'
+
                     llm_model_select = ui.select(
                         label='Model',
-                        options=[
-                            'gemini-1.5-flash',
-                            'gemini-1.5-pro'
-                        ],
-                        value=config_data['strategy']['llm_model']
+                        options=llm_model_options,
+                        value=current_model
                     ).classes('w-full')
                     ui.label('LLM model for trading decisions').classes('text-xs text-gray-400')
 
                     ui.separator()
 
 
+
+                    ui.separator()
+
+                    # Auto-Trading Configuration
+                    ui.label('Auto-Trading').classes('text-lg font-semibold text-white')
+                    auto_trade_enabled = ui.checkbox(
+                        'Enable Automatic Trading',
+                        value=config_data['strategy'].get('auto_trade_enabled', False)
+                    )
+
+                    with ui.row().classes('items-center w-full gap-4'):
+                        auto_trade_threshold = ui.slider(
+                            min=50, max=100, step=1,
+                            value=config_data['strategy'].get('auto_trade_threshold', 80)
+                        ).classes('flex-grow')
+                        threshold_label = ui.label(f"{config_data['strategy'].get('auto_trade_threshold', 80)}%").classes('text-white font-bold min-w-[50px]')
+                        auto_trade_threshold.on('update:model-value', lambda e: threshold_label.set_text(f'{e.args}%'))
+
+                    ui.label('Trades with confidence score >= threshold will be executed automatically. Others become proposals.').classes('text-xs text-gray-400')
 
                     ui.separator()
 
@@ -133,15 +159,19 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                             config_data['strategy']['assets'] = assets_input.value
                             config_data['strategy']['interval'] = interval_select.value
                             config_data['strategy']['llm_model'] = llm_model_select.value
+                            config_data['strategy']['auto_trade_enabled'] = auto_trade_enabled.value
+                            config_data['strategy']['auto_trade_threshold'] = int(auto_trade_threshold.value)
 
                             # Save to file
                             if save_config(config_data):
                                 # Update bot service config
                                 assets_list = [a.strip() for a in config_data['strategy']['assets'].replace(',', ' ').split() if a.strip()]
-                                bot_service.update_config({
+                                await bot_service.update_config({
                                     'assets': assets_list,
                                     'interval': config_data['strategy']['interval'],
-                                    'model': config_data['strategy']['llm_model']
+                                    'model': config_data['strategy']['llm_model'],
+                                    'auto_trade_enabled': config_data['strategy']['auto_trade_enabled'],
+                                    'auto_trade_threshold': config_data['strategy']['auto_trade_threshold']
                                 })
                                 ui.notify('Strategy configuration saved successfully!', type='positive')
                             else:
@@ -155,6 +185,8 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                             assets_input.value = loaded_config['strategy']['assets']
                             interval_select.value = loaded_config['strategy']['interval']
                             llm_model_select.value = loaded_config['strategy']['llm_model']
+                            auto_trade_enabled.value = loaded_config['strategy'].get('auto_trade_enabled', False)
+                            auto_trade_threshold.value = loaded_config['strategy'].get('auto_trade_threshold', 80)
                             ui.notify('Configuration loaded successfully!', type='positive')
                         except Exception as e:
                             ui.notify(f'Error loading config: {str(e)}', type='negative')
@@ -386,7 +418,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                             # Save to file
                             if save_config(config_data):
                                 # Update bot service
-                                bot_service.update_config({
+                                await bot_service.update_config({
                                     'max_position_size': config_data['risk_management']['max_position_size']
                                 })
                                 ui.notify('Risk management settings saved successfully!', type='positive')

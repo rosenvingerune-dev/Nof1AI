@@ -71,7 +71,7 @@ if __name__ in {"__main__", "__mp_main__"}:
         favicon="🤖",
         dark=True,                # Dark theme
         reload=False,             # Disable hot reload in production
-        show=True,                # Show window immediately
+        show=os.getenv('HEADLESS_MODE', 'False').lower() != 'true',  # Don't open browser in headless/docker mode
         port=int(os.getenv('API_PORT', 8081)),  # Default port
         binding_refresh_interval=0.1  # Faster UI updates
     )

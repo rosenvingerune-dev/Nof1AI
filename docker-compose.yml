@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  trading-bot:
+    build: .
+    container_name: nof1-alpha-arena
+    restart: unless-stopped
+    ports:
+      # Map Host Port : Container Port
+      # Change the LEFT number (8081) if it conflicts with another app
+      - "8081:8081"
+    volumes:
+      # Persist the data directory (config, logs, db)
+      - ./data:/app/data
+      # Optionally mount logs to see them on host
+      - ./bot.log:/app/bot.log
+    env_file:
+      - .env
+    environment:
+      - HEADLESS_MODE=true
+      - API_PORT=8081
+    # Healthcheck to ensure UI is responsive
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8081/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

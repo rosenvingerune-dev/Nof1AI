@@ -61,3 +61,11 @@ Systemet fremstår nå som en helhetlig trading-plattform hvor:
   - Oppdaterte System Prompt med regler for poengsetting (0-50: Weak, 51-75: Moderate, 76-90: Strong, 91-100: A+).
 - **Docker/Plan:** Opprettet VURDERING_OG_PLAN.md med strategi for Containerisering og Autotrading.
 
+
+### Oppdatering - Fase 3: Auto-Trading UI & Logic (v1.03)
+- **Settings UI:** Fikset bug hvor gamle config-filer kræsjet siden. La til full støtte for Auto-Trading konfigurasjon.
+- **Auto-Trading Logic:** Implementert 'Hybrid Mode' i ot_engine.py.
+  - Hvis Confidence >= Threshold (f.eks. 85%) OG Auto-Trade er på: **UTFØR HANDEL**.
+  - Ellers: **LAG FORSLAG** (Manuell godkjenning).
+- **Status:** Systemet kjører live med Auto-Trading aktivert (Threshold: 85%).
+
