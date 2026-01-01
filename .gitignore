@@ -1,0 +1,55 @@
+# Security / Secrets
+.env
+.env.local
+.env.*
+data/config.json
+keys/
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs and Databases
+*.log
+data/*.log
+data/*.db
+data/*.sqlite
+data/paper_trading_state.json
+
+# Temporary files
+tmp/
+temp/
+*~
