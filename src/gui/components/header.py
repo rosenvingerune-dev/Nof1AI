@@ -13,8 +13,8 @@ def create_header(state_manager: StateManager):
     Args:
         state_manager: Global state manager instance
     """
-    with ui.header().classes(
-            'row items-center justify-between p-4 bg-[#0B1120] border-b border-gray-800'
+    with ui.row().classes(
+            'w-full items-center justify-between p-4 bg-[#0B1120] border-b border-gray-800'
     ).style('height: 80px'):
         
         # Left: Logo & Title

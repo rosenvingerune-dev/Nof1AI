@@ -60,18 +60,13 @@ if __name__ in {"__main__", "__mp_main__"}:
         print("[INFO] NiceGUI app shutdown event triggered")
         cleanup()
 
-    app.on_shutdown(on_app_shutdown)
+    # Run in headless server mode (Docker friendly)
 
-    # Run in native desktop mode
     ui.run(
-        native=False,             # Browser mode to avoid WebView CSP issues
-        window_size=(1400, 900),  # Window dimensions
-        fullscreen=False,
-        title="AI Trading Bot",
-        favicon="🤖",
-        dark=True,                # Dark theme
-        reload=False,             # Disable hot reload in production
-        show=os.getenv('HEADLESS_MODE', 'False').lower() != 'true',  # Don't open browser in headless/docker mode
-        port=int(os.getenv('API_PORT', 8081)),  # Default port
-        binding_refresh_interval=0.1  # Faster UI updates
+        native=False,
+        show=False,
+        port=int(os.getenv('API_PORT', 8081)),
+        reload=False,
+        title="AI Trading Bot (Docker)",
+        dark=True
     )
