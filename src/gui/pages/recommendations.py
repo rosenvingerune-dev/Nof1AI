@@ -110,11 +110,14 @@ def create_recommendations(bot_service: BotService, state_manager: StateManager)
                     ui.label(action.upper())
             
             # Confidence bar
+            # Normalize confidence (handle 0.0-1.0 vs 0-100)
+            display_conf = confidence if confidence > 1.0 else confidence * 100
+            
             with ui.row().classes('w-full items-center gap-3 mb-4'):
                 ui.label('Confidence:').classes('text-sm text-gray-300')
-                with ui.linear_progress(value=confidence / 100).classes('flex-1'):
+                with ui.linear_progress(value=display_conf / 100).classes('flex-1'):
                     pass
-                ui.label(f'{confidence:.0f}%').classes('text-lg font-bold text-blue-400')
+                ui.label(f'{display_conf:.0f}%').classes('text-lg font-bold text-blue-400')
             
             # Trade details grid
             with ui.grid(columns=3).classes('w-full gap-4 mb-4'):
@@ -205,8 +208,8 @@ def create_recommendations(bot_service: BotService, state_manager: StateManager)
         except Exception as e:
             ui.notify(f'Error: {str(e)}', type='negative')
     
-    # Auto-refresh every 2 seconds
-    ui.timer(2.0, update_proposals)
+    # Auto-refresh every 10 seconds
+    ui.timer(10.0, update_proposals)
     
     # Initial update
     # (timer will handle subsequent updates)

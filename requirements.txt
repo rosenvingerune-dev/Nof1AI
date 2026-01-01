@@ -25,4 +25,5 @@ pytest-asyncio>=0.21.0
 # Utilities
 
 # Gemini SDK (for direct Gemini API integration)
-google-generativeai>=0.8.0
+# Google GenAI SDK (New)
+google-genai>=0.2.0

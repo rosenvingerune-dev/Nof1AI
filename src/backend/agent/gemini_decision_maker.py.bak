@@ -1,13 +1,14 @@
-"""Decision-making agent using Google GenAI SDK (v2)."""
+"""Decision-making agent using Google Gemini API directly (not via OpenRouter)."""
 
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
 import json
 import logging
 from datetime import datetime
 from src.backend.config_loader import CONFIG
 from src.backend.indicators.taapi_client import TAAPIClient
 import requests
+
 
 class GeminiTradingAgent:
     """Trading agent powered by Google Gemini API with function calling support."""
@@ -21,14 +22,32 @@ class GeminiTradingAgent:
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY not found in configuration")
 
-        # Initialize Client
-        # The new SDK uses a unified Client object
-        self.client = genai.Client(api_key=self.api_key)
+        # Configure Gemini SDK
+        genai.configure(api_key=self.api_key)
 
-        logging.info(f"Initialized GeminiTradingAgent (google-genai) with model: {self.model_name}")
+        # Initialize model with safety settings
+        self.model = genai.GenerativeModel(
+            model_name=self.model_name,
+            safety_settings={
+                HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            }
+        )
+
+        logging.info(f"Initialized GeminiTradingAgent with model: {self.model_name}")
 
     def decide_trade(self, assets, context):
-        """Decide for multiple assets in one call."""
+        """Decide for multiple assets in one call.
+
+        Args:
+            assets: Iterable of asset tickers to score.
+            context: Structured market/account state forwarded to Gemini.
+
+        Returns:
+            List of trade decision payloads, one per asset.
+        """
         return self._decide(context, assets=assets)
 
     def _decide(self, context, assets):
@@ -88,10 +107,10 @@ class GeminiTradingAgent:
             "- 91-100: A+ Setup. All systems go (Trend + Momentum + Volatility + Fundamentals). Aggressive entry.\n"
         )
 
-        # Define tool using Python dict/Type schema for google-genai
-        fetch_taapi_tool = types.Tool(
+        # Define function/tool for TAAPI indicator fetching
+        fetch_taapi_tool = genai.protos.Tool(
             function_declarations=[
-                types.FunctionDeclaration(
+                genai.protos.FunctionDeclaration(
                     name="fetch_taapi_indicator",
                     description=(
                         "Fetch any TAAPI indicator. Available: ema, sma, rsi, macd, bbands, stochastic, stochrsi, "
@@ -99,16 +118,16 @@ class GeminiTradingAgent:
                         "fibonacci, pivotpoints, keltner, donchian, awesome, gator, alligator, and 200+ more. "
                         "See https://taapi.io/indicators/ for full list and parameters."
                     ),
-                    parameters=types.Schema(
-                        type=types.Type.OBJECT,
+                    parameters=genai.protos.Schema(
+                        type=genai.protos.Type.OBJECT,
                         properties={
-                            "indicator": types.Schema(type=types.Type.STRING),
-                            "symbol": types.Schema(type=types.Type.STRING),
-                            "interval": types.Schema(type=types.Type.STRING),
-                            "period": types.Schema(type=types.Type.INTEGER),
-                            "backtrack": types.Schema(type=types.Type.INTEGER),
-                            "other_params": types.Schema(
-                                type=types.Type.OBJECT,
+                            "indicator": genai.protos.Schema(type=genai.protos.Type.STRING),
+                            "symbol": genai.protos.Schema(type=genai.protos.Type.STRING),
+                            "interval": genai.protos.Schema(type=genai.protos.Type.STRING),
+                            "period": genai.protos.Schema(type=genai.protos.Type.INTEGER),
+                            "backtrack": genai.protos.Schema(type=genai.protos.Type.INTEGER),
+                            "other_params": genai.protos.Schema(
+                                type=genai.protos.Type.OBJECT,
                                 properties={}
                             ),
                         },
@@ -118,8 +137,157 @@ class GeminiTradingAgent:
             ]
         )
 
-        # Build JSON schema explicitly
-        response_schema = {
+        # Build JSON schema for structured output
+        schema = self._build_schema(assets)
+
+        # Configure generation with JSON mode
+        generation_config = genai.types.GenerationConfig(
+            response_mime_type="application/json",
+            response_schema=schema,
+            temperature=0.7,
+            max_output_tokens=8192,
+        )
+
+        # Log the request
+        logging.info(f"Sending request to Gemini (model: {self.model_name})")
+        with open("llm_requests.log", "a", encoding="utf-8") as f:
+            f.write(f"\n\n=== {datetime.now()} ===\n")
+            f.write(f"Model: {self.model_name}\n")
+            f.write(f"Provider: Google Gemini (Direct API)\n")
+            f.write(f"Context length: {len(context)} characters\n")
+
+        # Create chat session with tools
+        chat = self.model.start_chat(
+            history=[],
+            enable_automatic_function_calling=False,
+            # tools=[fetch_taapi_tool] # Temporarily disabled to fix unhashable type error
+        )
+
+        # Send initial message with system prompt + context
+        full_prompt = f"{system_prompt}\n\n{context}"
+        
+        logging.info(f"Sending prompt to Gemini (Length: {len(full_prompt)})")
+
+        try:
+            # First turn: Send the prompt
+            response = chat.send_message(
+                full_prompt,
+                generation_config=generation_config
+            )
+
+            max_turns = 10
+            for turn in range(max_turns):
+                # Check if model wants to use functions from the LAST response
+                part = response.candidates[0].content.parts[0]
+                
+                if part.function_call:
+                    function_call = part.function_call
+                    
+                    if function_call.name == "fetch_taapi_indicator":
+                        # Execute the function call
+                        args = dict(function_call.args)
+                        logging.info(f"Gemini requested TAAPI indicator: {args}")
+
+                        try:
+                            params = {
+                                "secret": self.taapi.api_key,
+                                "exchange": "binance",
+                                "symbol": args["symbol"],
+                                "interval": args["interval"],
+                            }
+                            if args.get("period") is not None:
+                                params["period"] = args["period"]
+                            if args.get("backtrack") is not None:
+                                params["backtrack"] = args["backtrack"]
+                            if args.get("other_params") and isinstance(args["other_params"], dict):
+                                params.update(args["other_params"])
+
+                            ind_resp = requests.get(
+                                f"{self.taapi.base_url}{args['indicator']}",
+                                params=params,
+                                timeout=30
+                            ).json()
+                            
+                            function_result = {"result": ind_resp}
+
+                        except Exception as ex:
+                            function_result = {"error": str(ex)}
+
+                        # Send function response back to Gemini
+                        # This generates the NEXT response from the model
+                        response = chat.send_message(
+                            genai.protos.Content(
+                                parts=[
+                                    genai.protos.Part(
+                                        function_response=genai.protos.FunctionResponse(
+                                            name="fetch_taapi_indicator",
+                                            response=function_result
+                                        )
+                                    )
+                                ]
+                            ),
+                            generation_config=generation_config,
+                        )
+                        continue  # Process the new response in the next iteration
+
+                # If no function call, we have the final text response
+                break
+            
+            # --- Processing the Final Response ---
+            response_text = response.text
+            logging.info(f"Gemini response received ({len(response_text)} chars)")
+
+            with open("llm_requests.log", "a", encoding="utf-8") as f:
+                f.write(f"Response:\n{response_text[:500]}...\n")
+
+            # Parse JSON response
+            try:
+                parsed = json.loads(response_text)
+            except json.JSONDecodeError as e:
+                logging.error(f"JSON parse error: {e}")
+                # Fallback: try to extract JSON from markdown code blocks
+                if "```json" in response_text:
+                    start = response_text.find("```json") + 7
+                    end = response_text.find("```", start)
+                    if end > start:
+                        try:
+                            parsed = json.loads(response_text[start:end].strip())
+                        except json.JSONDecodeError:
+                            parsed = None
+                else:
+                    parsed = None
+
+            if not isinstance(parsed, dict):
+                logging.error("Expected dict payload from Gemini")
+                return self._fallback_response(assets)
+
+            reasoning_text = parsed.get("reasoning", "") or ""
+            decisions = parsed.get("trade_decisions")
+
+            if isinstance(decisions, list):
+                normalized = []
+                for item in decisions:
+                    if isinstance(item, dict):
+                        item.setdefault("allocation_usd", 0.0)
+                        item.setdefault("tp_price", None)
+                        item.setdefault("sl_price", None)
+                        item.setdefault("exit_plan", "")
+                        item.setdefault("exit_plan", "")
+                        item.setdefault("rationale", "")
+                        item.setdefault("confidence", 0.0)
+                        normalized.append(item)
+                return {"reasoning": reasoning_text, "trade_decisions": normalized}
+
+            logging.error("trade_decisions missing or invalid")
+            return self._fallback_response(assets, reasoning=reasoning_text)
+
+        except Exception as e:
+            logging.error(f"Gemini API error: {e}", exc_info=True)
+            return self._fallback_response(assets)
+
+    def _build_schema(self, assets):
+        """Build JSON schema for Gemini's structured output."""
+        return {
             "type": "object",
             "properties": {
                 "reasoning": {"type": "string"},
@@ -144,148 +312,6 @@ class GeminiTradingAgent:
             "required": ["reasoning", "trade_decisions"]
         }
 
-
-        # Log the request
-        logging.info(f"Sending request to Gemini (model: {self.model_name})")
-        with open("llm_requests.log", "a", encoding="utf-8") as f:
-            f.write(f"\n\n=== {datetime.now()} ===\n")
-            f.write(f"Model: {self.model_name}\n")
-            f.write(f"Provider: Google (google-genai SDK)\n")
-            f.write(f"Context length: {len(context)} characters\n")
-
-        # Create chat session
-        chat = self.client.chats.create(
-            model=self.model_name,
-            history=[],
-            config=types.GenerateContentConfig(
-                temperature=0.7,
-                candidate_count=1,
-                system_instruction=system_prompt,
-                tools=[fetch_taapi_tool], 
-            )
-        )
-
-        full_prompt = f"{context}" # System prompt is now in config
-        
-        logging.info(f"Sending prompt to Gemini (Length: {len(full_prompt)})")
-
-        try:
-            # First send
-            response = chat.send_message(
-                 message=full_prompt,
-                 config=types.GenerateContentConfig(
-                     response_mime_type="application/json",
-                     response_schema=response_schema
-                 )
-            )
-
-            max_turns = 10
-            for turn in range(max_turns):
-                # Check for function calls
-                # In google-genai, parts usually contain function_call
-                # We iterate through candidates/parts to find it.
-                
-                # Note: The response object structure in google-genai is slightly different.
-                # response.candidates[0].content.parts[0].function_call
-                # But it simplifies access sometimes.
-                
-                # We'll use the safe navigation assuming strict structure
-                if not response.candidates:
-                    break
-                    
-                part = response.candidates[0].content.parts[0]
-                
-                if part.function_call:
-                    fc = part.function_call
-                    if fc.name == "fetch_taapi_indicator":
-                        # Execute logic
-                        args = fc.args
-                        logging.info(f"Gemini requested TAAPI indicator: {args}")
-
-                        try:
-                            params = {
-                                "secret": self.taapi.api_key,
-                                "exchange": "binance",
-                                "symbol": args["symbol"],
-                                "interval": args["interval"],
-                            }
-                            if "period" in args and args["period"] is not None:
-                                params["period"] = args["period"]
-                            if "backtrack" in args and args["backtrack"] is not None:
-                                params["backtrack"] = args["backtrack"]
-                            if "other_params" in args and isinstance(args["other_params"], dict):
-                                params.update(args["other_params"])
-
-                            ind_resp = requests.get(
-                                f"{self.taapi.base_url}{args['indicator']}",
-                                params=params,
-                                timeout=30
-                            ).json()
-                            function_result = {"result": ind_resp}
-                        except Exception as ex:
-                            function_result = {"error": str(ex)}
-
-                        # Send output back
-                        # google-genai expects a FunctionResponse part
-                        response = chat.send_message(
-                            message=types.Part.from_function_response(
-                                name="fetch_taapi_indicator",
-                                response=function_result
-                            ),
-                            config=types.GenerateContentConfig(
-                                response_mime_type="application/json",
-                                response_schema=response_schema
-                            )
-                        )
-                        continue
-                
-                # If we get here, no function call -> Final result
-                break
-
-            response_text = response.text
-            logging.info(f"Gemini response received ({len(response_text)} chars)")
-            
-            with open("llm_requests.log", "a", encoding="utf-8") as f:
-                 f.write(f"Response:\n{response_text[:500]}...\n")
-
-            try:
-                parsed = json.loads(response_text)
-            except Exception:
-                # Fallback extraction
-                 if "```json" in response_text:
-                    start = response_text.find("```json") + 7
-                    end = response_text.find("```", start)
-                    if end > start:
-                         parsed = json.loads(response_text[start:end].strip())
-                    else:
-                        parsed = None
-                 else:
-                     parsed = None
-            
-            if not isinstance(parsed, dict):
-                 return self._fallback_response(assets, "Invalid JSON structure")
-                 
-            # Normalize fields
-            decisions = parsed.get("trade_decisions")
-            if isinstance(decisions, list):
-                normalized = []
-                for item in decisions:
-                    if isinstance(item, dict):
-                        item.setdefault("allocation_usd", 0.0)
-                        item.setdefault("tp_price", None)
-                        item.setdefault("sl_price", None)
-                        item.setdefault("exit_plan", "")
-                        item.setdefault("rationale", "")
-                        item.setdefault("confidence", 0.0)
-                        normalized.append(item)
-                return {"reasoning": parsed.get("reasoning", ""), "trade_decisions": normalized}
-            
-            return self._fallback_response(assets, "Missing trade_decisions")
-
-        except Exception as e:
-            logging.error(f"Gemini API error: {e}", exc_info=True)
-            return self._fallback_response(assets, f"Exception: {str(e)}")
-
     def _fallback_response(self, assets, reasoning="Error occurred"):
         """Generate fallback HOLD response when API fails."""
         return {
@@ -296,6 +322,7 @@ class GeminiTradingAgent:
                 "allocation_usd": 0.0,
                 "tp_price": None,
                 "sl_price": None,
+                "exit_plan": "",
                 "exit_plan": "",
                 "confidence": 0.0,
                 "rationale": "API error - defaulting to HOLD"

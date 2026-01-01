@@ -327,8 +327,8 @@ def create_dashboard(bot_service: BotService, state_manager: StateManager):
             activity_log.push(f'Dashboard update error: {str(e)}')
 
     # ===== AUTO-REFRESH TIMER =====
-    # Update dashboard every 3 seconds
-    ui.timer(3.0, update_dashboard)
+    # Update dashboard every 10 seconds to reduce load
+    ui.timer(10.0, update_dashboard)
 
     # Initial update (call immediately, but don't await in sync context)
     # The timer will handle subsequent updates

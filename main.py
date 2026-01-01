@@ -4,8 +4,6 @@ Entry point for the application
 """
 
 import os 
-import signal
-import sys
 import asyncio
 import atexit
 from nicegui import ui, app
@@ -13,11 +11,7 @@ from nicegui import ui, app
 # Global reference to bot_service for cleanup
 bot_service_ref = None
 
-def signal_handler(signum, frame):
-    """Handle shutdown signals gracefully"""
-    print("\n[INFO] Shutting down gracefully...")
-    cleanup()
-    sys.exit(0)
+
 
 def cleanup():
     """Cleanup function called on exit"""
@@ -38,9 +32,7 @@ def cleanup():
             print(f"[WARN] Error stopping bot: {e}")
 
 if __name__ in {"__main__", "__mp_main__"}:
-    # Setup signal handlers for graceful shutdown
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+
 
     # Register cleanup on exit
     atexit.register(cleanup)
@@ -66,6 +58,8 @@ if __name__ in {"__main__", "__mp_main__"}:
         native=False,
         show=False,
         port=int(os.getenv('API_PORT', 8081)),
+        binding_refresh_interval=0.5,  # Reduce refresh rate to prevent UI freezing
+        reconnect_timeout=10.0,        # Allow longer reconnect time
         reload=False,
         title="AI Trading Bot (Docker)",
         dark=True

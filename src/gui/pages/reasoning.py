@@ -190,8 +190,8 @@ def create_reasoning(bot_service: BotService, state_manager: StateManager):
 
     action_filter.on('update:model-value', on_filter_change)
 
-    # Auto-refresh every 3 seconds
-    ui.timer(3.0, update_reasoning)
+    # Auto-refresh every 10 seconds
+    ui.timer(10.0, update_reasoning)
 
     # Initial update
     # Initial update with error handling
