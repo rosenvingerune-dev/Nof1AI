@@ -199,6 +199,9 @@ def create_market(bot_service: BotService, state_manager: StateManager):
     # ===== AUTO-REFRESH LOGIC =====
     async def update_market_data():
         """Update market data and indicators from real bot data"""
+        def to_list(val):
+            return val if isinstance(val, list) else [val]
+
         try:
             state = state_manager.get_state()
             selected_asset = asset_select.value
@@ -337,6 +340,58 @@ def create_market(bot_service: BotService, state_manager: StateManager):
             sentiment_label.set_text(sentiment_text)
             sentiment_label.classes(replace=f'text-3xl font-bold {sentiment_color}')
             sentiment_desc.set_text(sentiment_desc_text)
+
+            # ===== SIGNAL ICONS LOGIC =====
+            try:
+                # 1. Trend Signal (Price relative to EMA50)
+                ema50_val = intraday.get('ema50') or long_term.get('ema50')
+                if current_price and ema50_val:
+                    ema50_f = float(to_list(ema50_val)[-1] if isinstance(ema50_val, list) else ema50_val)
+                    if current_price > ema50_f:
+                        trend_icon.set_text('●')
+                        trend_icon.classes(replace='text-2xl text-green-400')
+                    else:
+                        trend_icon.set_text('●')
+                        trend_icon.classes(replace='text-2xl text-red-400')
+                else:
+                    trend_icon.set_text('○')
+                    trend_icon.classes(replace='text-2xl text-gray-400')
+
+                # 2. Momentum Signal (RSI)
+                if rsi_value:
+                    rsi_f = float(rsi_value)
+                    if rsi_f > 55:
+                        momentum_icon.set_text('●')
+                        momentum_icon.classes(replace='text-2xl text-green-400')
+                    elif rsi_f < 45:
+                        momentum_icon.set_text('●')
+                        momentum_icon.classes(replace='text-2xl text-red-400')
+                    else:
+                        momentum_icon.set_text('○')
+                        momentum_icon.classes(replace='text-2xl text-gray-400')
+                else:
+                    momentum_icon.set_text('○')
+                    momentum_icon.classes(replace='text-2xl text-gray-400')
+
+                # 3. Volume Signal (Based on 24h Change direction)
+                chg_24 = market_data.get('change_24h')
+                if chg_24 is not None:
+                    if chg_24 > 1.0:
+                        volume_icon.set_text('●')
+                        volume_icon.classes(replace='text-2xl text-green-400')
+                    elif chg_24 < -1.0:
+                        volume_icon.set_text('●')
+                        volume_icon.classes(replace='text-2xl text-red-400')
+                    else:
+                        volume_icon.set_text('○')
+                        volume_icon.classes(replace='text-2xl text-gray-400')
+                else:
+                    volume_icon.set_text('○')
+                    volume_icon.classes(replace='text-2xl text-gray-400')
+
+            except Exception as e:
+                # Keep defaults on error
+                pass
 
             # ===== CHART UPDATES (New Logic) =====
             price_history = market_data.get('price_history', [])
