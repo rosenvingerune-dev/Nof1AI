@@ -178,46 +178,17 @@ class TradingBotEngine:
             while self.is_running:
                 self.invocation_count += 1
                 self.state.invocation_count = self.invocation_count
+                self.state.error = None  # Clear previous errors on new iteration
 
                 try:
-                    # ===== PHASE 1: Fetch Account State =====
+                    # ===== PHASE 1 & 2: Fetch Account State & Positions =====
                     state = await self.exchange.get_user_state()
-                    balance = state['balance']
-                    total_value = state['total_value']
-
-                    # Calculate total return
-                    initial_balance = 10000.0  # TODO: load from config
-                    total_return_pct = ((total_value - initial_balance) / initial_balance) * 100
+                    await self._update_bot_account_state(state)
 
                     sharpe_ratio = self._calculate_sharpe(self.trade_log)
-                    
-                    self.logger.debug(f"  Balance: ${balance:,.2f} | Return: {total_return_pct:+.2f}% | Sharpe: {sharpe_ratio:.2f}")
-
-                    # Update bot state
-                    self.state.balance = balance
-                    self.state.total_value = total_value
-                    self.state.total_return_pct = total_return_pct
                     self.state.sharpe_ratio = sharpe_ratio
-
-                    # ===== PHASE 2: Enrich Positions =====
-                    enriched_positions = []
-                    for pos in state['positions']:
-                        symbol = pos.get('coin')
-                        try:
-                            current_price = await self.exchange.get_current_price(symbol)
-                            enriched_positions.append({
-                                'symbol': symbol,
-                                'quantity': float(pos.get('szi', 0) or 0),
-                                'entry_price': float(pos.get('entryPx', 0) or 0),
-                                'current_price': current_price,
-                                'liquidation_price': float(pos.get('liquidationPx', 0) or 0),
-                                'unrealized_pnl': pos.get('pnl', 0.0),
-                                'leverage': pos.get('leverage', {}).get('value', 1) if isinstance(pos.get('leverage'), dict) else pos.get('leverage', 1)
-                            })
-                        except Exception as e:
-                            self.logger.error(f"Error enriching position for {symbol}: {e}")
-
-                    self.state.positions = enriched_positions
+                    
+                    self.logger.debug(f"  Balance: ${self.state.balance:,.2f} | Return: {self.state.total_return_pct:+.2f}%")
 
                     # ===== PHASE 3: Load Recent Diary =====
                     recent_diary = self._load_recent_diary(limit=10)
@@ -280,11 +251,11 @@ class TradingBotEngine:
 
                     # ===== PHASE 7: Build Dashboard =====
                     dashboard = {
-                        'total_return_pct': total_return_pct,
-                        'balance': balance,
-                        'account_value': total_value,
-                        'sharpe_ratio': sharpe_ratio,
-                        'positions': enriched_positions,
+                        'total_return_pct': self.state.total_return_pct,
+                        'balance': self.state.balance,
+                        'account_value': self.state.total_value,
+                        'sharpe_ratio': self.state.sharpe_ratio,
+                        'positions': self.state.positions,
                         'active_trades': self.active_trades,
                         'open_orders': open_orders,
                         'recent_diary': recent_diary,
@@ -668,6 +639,38 @@ class TradingBotEngine:
             if self.on_error:
                 self.on_error(str(e))
 
+    async def _update_bot_account_state(self, user_state: Dict):
+        """Update bot state positions AND balance from exchange state"""
+        # 1. Update Balance & Return
+        self.state.balance = float(user_state.get('balance', 0.0))
+        self.state.total_value = float(user_state.get('total_value', 0.0))
+        
+        initial = 10000.0 # TODO: Config
+        if initial > 0:
+            self.state.total_return_pct = ((self.state.total_value - initial) / initial) * 100
+        
+        # 2. Enrich Positions
+        raw_positions = user_state.get('positions', [])
+        enriched_positions = []
+        for pos in raw_positions:
+            symbol = pos.get('coin')
+            try:
+                current_price = await self.exchange.get_current_price(symbol)
+                enriched_positions.append({
+                    'symbol': symbol,
+                    'quantity': float(pos.get('szi', 0) or 0),
+                    'entry_price': float(pos.get('entryPx', 0) or 0),
+                    'current_price': current_price,
+                    'liquidation_price': float(pos.get('liquidationPx', 0) or 0),
+                    'unrealized_pnl': float(pos.get('pnl', 0.0) or 0.0),
+                    'leverage': pos.get('leverage', {}).get('value', 1) if isinstance(pos.get('leverage'), dict) else pos.get('leverage', 1)
+                })
+            except Exception as e:
+                self.logger.error(f"Error enriching position for {symbol}: {e}")
+
+        self.state.positions = enriched_positions
+        self._notify_state_update()
+
     async def _reconcile_active_trades(self, positions: List[Dict], open_orders: List[Dict]):
         """
         Reconcile local active_trades with exchange state.
@@ -802,6 +805,14 @@ class TradingBotEngine:
                         })
 
                         self.logger.info(f"Manually closed position: {asset}")
+                        
+                        # Force immediate update
+                        try:
+                            user_state = await self.exchange.get_user_state()
+                            await self._update_bot_account_state(user_state)
+                        except Exception as e:
+                            self.logger.error(f"Failed to refresh state after close: {e}")
+
                         return True
 
             self.logger.warning(f"No position found to close: {asset}")
@@ -999,6 +1010,13 @@ class TradingBotEngine:
                 })
             
             self.logger.info(f"[SUCCESS] Proposal executed: {proposal.id[:8]}")
+            
+            # Force immediate position update
+            try:
+                user_state = await self.exchange.get_user_state()
+                await self._update_bot_account_state(user_state)
+            except Exception as e:
+                self.logger.error(f"Failed to auto-refresh positions: {e}")
             
         except Exception as e:
             self.logger.error(f"Failed to execute proposal {proposal.id}: {e}")

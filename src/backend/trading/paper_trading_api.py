@@ -72,7 +72,7 @@ class PaperTradingAPI:
 
         # Price cache (to avoid too many API calls)
         self._price_cache: Dict[str, tuple[float, datetime]] = {}
-        self._cache_ttl = 5  # seconds
+        self._cache_ttl = 2  # seconds (Increased slightly to avoid API/Hold errors)
 
         # Mock wallet (for compatibility)
         self.wallet = type('Wallet', (), {'address': '0xPaperTradingWallet'})()
@@ -301,12 +301,20 @@ class PaperTradingAPI:
 
         # Update or create position
         if asset in self.positions:
-            # Add to existing position (average entry price)
+            # Add to existing position
             existing = self.positions[asset]
             total_size = existing.size + amount
-            avg_entry = (existing.entry_px * existing.size + fill_price * amount) / total_size
-            existing.size = total_size
-            existing.entry_px = avg_entry
+            
+            if abs(total_size) < 0.0001:
+                # Position closed
+                del self.positions[asset]
+            else:
+                # Only update Avg Entry if increasing exposure (same side)
+                # If reducing (e.g. Closing Short), Entry Price represents original entry.
+                if (existing.size > 0 and amount > 0) or (existing.size < 0 and amount < 0):
+                     existing.entry_px = (existing.entry_px * existing.size + fill_price * amount) / total_size
+                
+                existing.size = total_size
         else:
             self.positions[asset] = Position(
                 coin=asset,

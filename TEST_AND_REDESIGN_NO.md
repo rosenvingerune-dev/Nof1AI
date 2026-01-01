@@ -42,3 +42,13 @@ Systemet fremstår nå som en helhetlig trading-plattform hvor:
 - Porteføljen huskes mellom økter.
 - Markedsanalysen er sanntidsbasert og visuelt tydelig.
 - Koden er trygt lagret og versjonskontrollert.
+
+### 4. Feilretting og Stabilisering (Siste)
+- **Short-Close Fix:** Fikset kritisk 'ZeroDivisionError' i paper_trading_api som krasjet boten når man prøvde å lukke en short-posisjon.
+- **Immediate Balance Update:** Utvidet _update_bot_account_state til å oppdatere både posisjoner og saldo (Balance + Equity) umiddelbart etter handel/lukking.
+- **JSON Error Fix:** Økte max_output_tokens til 8192 for Gemini og justerte prompten for å unngå at lange resonnementer blir kuttet av.
+- **UI Polish:** 
+  - La til versjonsnummer (v1.01) i header.
+  - La til Tooltip på 'Error'-merket for enklere feilsøking.
+  - Sørget for at feilmeldinger ('Error') forsvinner automatisk når neste runde kjører feilfritt.
+

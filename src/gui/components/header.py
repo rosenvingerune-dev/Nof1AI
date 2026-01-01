@@ -18,7 +18,7 @@ def create_header(state_manager: StateManager):
             # Logo and title
             with ui.row().classes('items-center gap-2'):
                 ui.label('🤖').classes('text-3xl')
-                ui.label('AI Trading Bot').classes('text-2xl font-bold text-white')
+                ui.label('AI Trading Bot v1.01').classes('text-2xl font-bold text-white')
 
             # Quick metrics
             with ui.row().classes('gap-8'):
@@ -71,6 +71,9 @@ def create_header(state_manager: StateManager):
                 if state.error:
                     status_label.text = '🔴 Error'
                     status_label.classes(remove='text-green-500 text-gray-400', add='text-red-500')
+                    status_label.tooltip(str(state.error))
+                else:
+                    status_label.tooltip('Status OK')
 
             # Refresh every second
             ui.timer(1.0, update_header)

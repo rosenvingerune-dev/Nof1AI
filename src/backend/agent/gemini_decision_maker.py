@@ -94,7 +94,7 @@ class GeminiTradingAgent:
             "- Favor alignment across 4h and 5m. Counter-trend scalps require stronger intraday confirmation and tighter risk.\n\n"
             "Output contract\n"
             "- Output a STRICT JSON object with exactly two properties in this order:\n"
-            "  • reasoning: long-form string capturing detailed, step-by-step analysis that means you can acknowledge existing information as clarity, or acknowledge that you need more information to make a decision (be verbose).\n"
+            "  • reasoning: detailed but concise string (max 4000 chars) capturing key analysis. Do not write a novel.\n"
             "  • trade_decisions: array ordered to match the provided assets list.\n"
             "- Each item inside trade_decisions must contain the keys {asset, action, allocation_usd, tp_price, sl_price, exit_plan, rationale}.\n"
             "- Do not emit Markdown or any extra properties.\n"
@@ -138,6 +138,7 @@ class GeminiTradingAgent:
             response_mime_type="application/json",
             response_schema=schema,
             temperature=0.7,
+            max_output_tokens=8192,
         )
 
         # Log the request
