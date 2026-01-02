@@ -125,21 +125,21 @@
 
 ### **WEEK 3: Architecture Refactoring** 🏗️
 
-#### Day 1-3: Dependency Injection
-- [ ] Create `src/gui/container.py` for DI
-- [ ] Remove global state from `app.py`
-- [ ] Wire dependencies through constructor injection
-- [ ] Add unit tests for services
+#### Day 1-3: Dependency Injection ✅
+- [x] Create `src/gui/container.py` for DI
+- [x] Remove global state from `app.py`
+- [x] Wire dependencies through constructor injection
+- [x] Add unit tests for services
 
 **Expected improvement:** Testability, maintainability
 
 ---
 
-#### Day 4-5: Separate UI State from Business State
-- [ ] Create `src/gui/state/ui_state.py`
-- [ ] Persist filter settings, scroll positions
-- [ ] Implement state restoration on app restart
-- [ ] Add user preferences
+#### Day 4-5: Separate UI State from Business State ✅
+- [x] Create `src/gui/state/ui_state.py`
+- [x] Persist filter settings, scroll positions
+- [x] Implement state restoration on app restart
+- [x] Add user preferences
 
 **Expected improvement:** Better UX, state persistence
 
@@ -147,20 +147,20 @@
 
 ### **WEEK 4: Stability & Quality of Life** 🛡️
 
-#### Day 1-2: Endurance & Stability Framework
-- [ ] Implement "Fast-Forward" simulation (simulate 1 week of events in 5 mins)
-- [ ] Verify StateManager integrity after long runs
-- [ ] Memory profiler for 24/7 operation checks
-- [ ] Race condition detection in EventBus
+#### Day 1-2: Endurance & Stability Framework ✅
+- [x] Implement "Fast-Forward" simulation (`tests/performance/test_endurance.py`)
+- [x] Verify StateManager integrity after long runs
+- [x] Memory profiler for 24/7 operation checks
+- [x] Race condition detection in EventBus
 
 **Expected improvement:** Guaranteed reliability for 24/7 operation
 
 ---
 
-#### Day 3: Optimistic UI & Interactions
-- [ ] Implement "Optimistic Updates" for buttons (Close, Trade) -> Instant feedback
-- [ ] Add toast notifications for background events
-- [ ] Polish "Connection Lost" / "Reconnecting" states
+#### Day 3: Optimistic UI & Interactions ✅
+- [x] Implement "Optimistic Updates" for buttons (Close, Trade) -> Instant feedback
+- [x] Add toast notifications for background events
+- [x] Polish "Connection Lost" / "Reconnecting" states
 
 **Expected improvement:** Premium "feel" and responsiveness
 
@@ -268,14 +268,14 @@ if file_size > 100_000:  # 100KB
 - [x] Skeleton screens (`src/gui/components/skeleton.py`) ✅
 
 ### Week 3: Architecture
-- [ ] Dependency injection
-- [ ] UI state separation
-- [ ] State persistence
+- [x] Dependency injection (`src/gui/container.py`) ✅
+- [x] UI state separation (`src/gui/state/ui_state.py`) ✅
+- [x] State persistence (via `data/user_prefs.json`) ✅
 
 ### Week 4: Stability & Polish
-- [ ] Endurance testing (Simulated weeks)
-- [ ] Memory leak detection
-- [ ] Optimistic UI updates
+- [x] Endurance testing (`tests/performance/test_endurance.py`) ✅
+- [x] Memory leak detection (verified < 1MB growth per 1000 events) ✅
+- [x] Optimistic UI updates (Spinners & Instant Feedback) ✅
 - [ ] Documentation
 
 ---

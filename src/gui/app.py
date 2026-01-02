@@ -5,18 +5,13 @@ Main GUI Application - Single Page App with internal navigation
 from nicegui import ui
 from src.gui.components.header import create_header
 from src.gui.components.sidebar import Sidebar
-from src.gui.services.bot_service import BotService
-from src.gui.services.state_manager import StateManager
 
 # Import pages
-from src.gui.pages import dashboard, positions, history, market, reasoning, settings, recommendations, logs
+from src.gui.container import get_container
+from src.gui.pages import dashboard_reactive as dashboard, positions_reactive as positions, history_optimized as history, market, reasoning, settings, recommendations, logs
 
-# Global services
-bot_service = BotService()
-state_manager = StateManager()
-
-# Connect services
-bot_service.state_manager = state_manager
+# Initialize container
+container = get_container()
 
 
 def create_app():
@@ -49,7 +44,7 @@ def create_app():
 
     # Main layout
     with ui.column().classes('w-full h-screen p-0 gap-0 bg-slate-950'):
-        create_header(state_manager)
+        create_header(container.state_manager)
 
         with ui.row().classes('w-full flex-grow overflow-hidden gap-0'):
             # Sidebar with navigation
@@ -76,18 +71,18 @@ def navigate(page: str):
 
     with content_container:
         if page == 'Dashboard':
-            dashboard.create_dashboard(bot_service, state_manager)
+            dashboard.create_dashboard(container.bot_service, container.state_manager)
         elif page == 'Recommendations':
-            recommendations.create_recommendations(bot_service, state_manager)
+            recommendations.create_recommendations(container.bot_service, container.state_manager)
         elif page == 'Positions':
-            positions.create_positions(bot_service, state_manager)
+            positions.create_positions(container.bot_service, container.state_manager)
         elif page == 'History':
-            history.create_history(bot_service, state_manager)
+            history.create_history(container.bot_service, container.state_manager)
         elif page == 'Market':
-            market.create_market(bot_service, state_manager)
+            market.create_market(container.bot_service, container.state_manager)
         elif page == 'Reasoning':
-            reasoning.create_reasoning(bot_service, state_manager)
+            reasoning.create_reasoning(container.bot_service, container.state_manager)
         elif page == 'Settings':
-            settings.create_settings(bot_service, state_manager)
+            settings.create_settings(container.bot_service, container.state_manager)
         elif page == 'Logs':
             logs.create_logs()
