@@ -11,6 +11,8 @@ from datetime import datetime
 
 from src.backend.bot_engine import TradingBotEngine, BotState
 from src.backend.config_loader import CONFIG
+from src.gui.services.event_bus import get_event_bus, EventTypes
+from src.gui.services.cache_manager import get_cache_manager
 
 
 class BotService:
@@ -22,6 +24,8 @@ class BotService:
         self.equity_history: List[Dict] = []
         self.recent_events: List[Dict] = []
         self.logger = logging.getLogger(__name__)
+        self.event_bus = get_event_bus()  # Event-driven updates
+        self.cache = get_cache_manager()  # Performance caching
 
         # Try to load persisted config from file (overrides .env)
         self._load_config_file()
@@ -130,22 +134,37 @@ class BotService:
         self,
         asset: Optional[str] = None,
         action: Optional[str] = None,
-        limit: int = 100
+        limit: int = 100,
+        offset: int = 0
     ) -> List[Dict]:
         """
-        Get trade history from diary.jsonl with optional filtering.
+        Get trade history from diary.jsonl with optional filtering and pagination.
 
         Args:
             asset: Filter by asset (optional)
             action: Filter by action (buy/sell/hold) (optional)
             limit: Maximum number of entries to return
+            offset: Number of entries to skip (for pagination)
 
         Returns:
             List of trade entries
+
+        Example:
+            # Get first 50 trades:
+            page1 = get_trade_history(limit=50, offset=0)
+
+            # Get next 50 trades:
+            page2 = get_trade_history(limit=50, offset=50)
         """
         diary_path = Path("data/diary.jsonl")
         if not diary_path.exists():
             return []
+
+        # Check cache
+        cache_key = f"trade_history_{asset}_{action}_{limit}_{offset}"
+        cached_data = self.cache.get(cache_key)
+        if cached_data:
+            return cached_data
 
         try:
             entries = []
@@ -166,7 +185,16 @@ class BotService:
                         except json.JSONDecodeError:
                             continue
 
-            return entries[-limit:]
+            # Apply pagination (return most recent first)
+            entries = list(reversed(entries))  # Most recent first
+
+            # Apply offset and limit
+            start_idx = offset
+            end_idx = offset + limit
+
+            result = entries[start_idx:end_idx]
+            self.cache.set(cache_key, result, ttl=10.0)  # Cache for 10s
+            return result
 
         except Exception as e:
             self.logger.error(f"Failed to load trade history: {e}")
@@ -268,6 +296,12 @@ class BotService:
         Returns:
             True if successful, False otherwise
         """
+        # Check cache first (TTL 5s)
+        cache_key = "refresh_market_data"
+        if self.cache.get(cache_key):
+            self.logger.debug("Skipping market refresh (cached)")
+            return True
+            
         try:
             # Use existing exchange instance if available (preserves Paper Trading state)
             if self.bot_engine:
@@ -334,6 +368,10 @@ class BotService:
             self._add_event(f"📊 Market data refreshed - Balance: ${state.balance:,.2f}")
 
             self.logger.info("Market data refreshed successfully")
+            
+            # Set cache
+            self.cache.set(cache_key, True, ttl=5.0)
+            
             return True
 
         except Exception as e:
@@ -451,7 +489,7 @@ class BotService:
     def _on_trade_executed(self, trade: Dict):
         """
         Callback when trade is executed.
-        Adds event to activity feed.
+        Adds event to activity feed and broadcasts via EventBus.
         """
         asset = trade.get('asset', '')
         action = trade.get('action', '').upper()
@@ -460,6 +498,12 @@ class BotService:
 
         message = f"{action} {amount:.6f} {asset} @ ${price:,.2f}"
         self._add_event(message)
+
+        # Broadcast trade execution event
+        self.event_bus.publish_sync(EventTypes.TRADE_EXECUTED, trade, source="BotService")
+        
+        # Invalidate trade history cache so UI updates immediately
+        self.cache.invalidate("trade_history")
 
     def _on_error(self, error: str):
         """

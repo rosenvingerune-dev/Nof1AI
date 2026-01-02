@@ -26,11 +26,30 @@ def create_logs():
         log_view = ui.log(max_lines=5000).classes('w-full flex-grow bg-slate-950 text-green-400 font-mono text-[11px] p-4 overflow-auto leading-tight')
 
     # State for file reading context
-    state = {'last_pos': 0, 'file_path': Path("bot.log")}
+    state = {'last_pos': 0, 'file_path': Path("bot.log"), 'last_stat': (0, 0)}
 
     async def read_log():
         """Read new lines from log file asynchronously"""
         if not state['file_path'].exists():
+            return
+
+        # Optimization: Check file stat before opening
+        try:
+            stat = os.stat(state['file_path'])
+            current_stat = (stat.st_mtime, stat.st_size)
+            
+            # If nothing changed, return immediately (saves CPU/IO)
+            if current_stat == state['last_stat']:
+                return
+                
+            # Log rotation detection (file got smaller)
+            if stat.st_size < state['last_pos']:
+                state['last_pos'] = 0
+                log_view.push("--- LOG ROTATED ---")
+                
+            state['last_stat'] = current_stat
+            
+        except Exception:
             return
 
         def _read_file_sync():
@@ -66,8 +85,10 @@ def create_logs():
         new_lines = await asyncio.to_thread(_read_file_sync)
         
         # Update UI
-        for line in new_lines:
-            log_view.push(line)
+        if new_lines:
+            # Batch update if possible, or just loop
+            for line in new_lines:
+                log_view.push(line)
 
-    # Auto-refresh every 1.0s
-    ui.timer(1.0, read_log)
+    # Smart polling: frequent check (0.2s) but cheap (os.stat only)
+    ui.timer(0.2, read_log)
