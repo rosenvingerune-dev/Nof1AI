@@ -596,6 +596,16 @@ class PaperTradingAPI:
             total_unrealized_pnl += unrealized_pnl
 
             enriched_positions.append({
+                "symbol": asset,
+                "quantity": pos.size,
+                "entry_price": pos.entry_px,
+                "current_price": current_price,
+                "unrealized_pnl": unrealized_pnl,
+                "pnl_pct": (unrealized_pnl / pos.notional * 100) if pos.notional > 0 else 0.0,
+                "leverage": 1,
+                "liquidation_price": 0,
+                "side": "LONG" if pos.size > 0 else "SHORT",
+                # Keep raw keys for compatibility if needed elsewhere
                 "coin": asset,
                 "szi": str(pos.size),
                 "entryPx": str(pos.entry_px),

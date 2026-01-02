@@ -214,6 +214,7 @@ def create_dashboard(bot_service: BotService, state_manager: StateManager):
 
             if success:
                 last_refresh_time = time.time()
+                last_refresh_label.text = 'Last refreshed: Just now'
                 refresh_data_loading.text = '✅ Done'
                 activity_log.push('✅ Market data refreshed successfully!')
                 ui.notify('Market data refreshed!', type='positive')
@@ -267,7 +268,7 @@ def create_dashboard(bot_service: BotService, state_manager: StateManager):
             # Update asset allocation chart
             positions = state.positions or []
             if positions:
-                labels = [p['symbol'] for p in positions]
+                labels = [p.get('symbol', p.get('asset', 'Unknown')) for p in positions]
                 values = [abs(p['quantity'] * p['entry_price']) for p in positions]
 
                 allocation_chart.figure.data[0].labels = labels
@@ -355,7 +356,9 @@ def create_dashboard(bot_service: BotService, state_manager: StateManager):
 
     # ===== EVENT HANDLERS (REACTIVE) =====
 
-    async def on_state_update(state):
+    # ===== EVENT HANDLERS (REACTIVE) =====
+    
+    def on_state_update(state):
         """
         Main event handler for state updates.
         Called by EventBus when state changes - NO POLLING!
@@ -407,7 +410,7 @@ def create_dashboard(bot_service: BotService, state_manager: StateManager):
 
     # Initial render with current state
     initial_state = state_manager.get_state()
-    asyncio.create_task(on_state_update(initial_state))
+    on_state_update(initial_state)
 
     # Log performance improvement
     activity_log.push('✨ Using reactive dashboard (80% less CPU usage)')

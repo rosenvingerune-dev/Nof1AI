@@ -338,9 +338,20 @@ class HyperliquidAPI:
             side = "long" if size > 0 else "short"
             current_px = await self.get_current_price(pos["coin"]) if entry_px and size else 0.0
             pnl = (current_px - entry_px) * abs(size) if side == "long" else (entry_px - current_px) * abs(size)
-            pos["pnl"] = pnl
-            pos["notional_entry"] = abs(size) * entry_px
-            enriched_positions.append(pos)
+            enriched_pos = {
+                "symbol": pos.get("coin"),
+                "ticket": pos.get("coin"),  # Legacy compatibility
+                "quantity": size,
+                "entry_price": entry_px,
+                "current_price": current_px,
+                "unrealized_pnl": pnl,
+                "pnl_pct": (pnl / (abs(size) * entry_px) * 100) if entry_px and size else 0.0,
+                "leverage": float(pos.get("leverage", {}).get("value", 1) if isinstance(pos.get("leverage"), dict) else pos.get("leverage", 1)),
+                "liquidation_price": float(pos.get("liquidationPx", 0) or 0),
+                "side": side.upper(),
+                "raw": pos  # Keep raw data for debugging
+            }
+            enriched_positions.append(enriched_pos)
         balance = float(state.get("withdrawable", 0.0))
         if not total_value:
             total_value = balance + sum(max(p.get("pnl", 0.0), 0.0) for p in enriched_positions)
