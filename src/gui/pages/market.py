@@ -203,6 +203,9 @@ def create_market(bot_service: BotService, state_manager: StateManager):
             return val if isinstance(val, list) else [val]
 
         try:
+            if current_price_label.is_deleted:
+                return
+
             state = state_manager.get_state()
             selected_asset = asset_select.value
 
@@ -455,8 +458,14 @@ def create_market(bot_service: BotService, state_manager: StateManager):
             print(f"Error updating market data: {e}")
 
     # Auto-refresh every 10 seconds (Optimization to prevent UI freeze)
-    ui.timer(10.0, update_market_data)
+    timer = ui.timer(10.0, update_market_data)
 
     # Refresh on asset/interval change
     asset_select.on('update:model-value', lambda: update_market_data())
     interval_select.on('update:model-value', lambda: update_market_data())
+    
+    # Return cleanup function
+    def cleanup():
+        timer.cancel()
+        
+    return cleanup

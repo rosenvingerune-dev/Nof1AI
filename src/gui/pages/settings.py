@@ -237,7 +237,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     hyperliquid_network = ui.select(
                         label='Network',
                         options=['mainnet', 'testnet'],
-                        value=config_data['api_keys']['hyperliquid_network']
+                        value=config_data['api_keys'].get('hyperliquid_network', 'mainnet')
                     ).classes('w-full')
 
                     ui.separator()
@@ -247,7 +247,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     openrouter_input = ui.input(
                         label='OpenRouter API Key',
                         placeholder='sk-or-v1-...',
-                        value=config_data['api_keys']['openrouter_api_key'],
+                        value=config_data['api_keys'].get('openrouter_api_key', ''),
                         password=True,
                         password_toggle_button=True
                     ).classes('w-full')

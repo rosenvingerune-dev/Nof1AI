@@ -1,8 +1,14 @@
 # Changelog
 
-## [Unreleased] - 2026-01-01
+## [0.2.2] - 2026-01-03
 
 ### Fixed
+- **NiceGUI 2.0 Compatibility**: Updated `ui.open` calls to `ui.navigate.to` in `main.py` and `src/gui/app.py` to fix crash on startup with newer NiceGUI versions.
+- **Positions Page Crash**: Removed redundant/premature code in `src/gui/pages/positions_reactive.py` that caused `UnboundLocalError` (Server Error 500).
+- **Settings Page Crash**: Fixed `KeyError: 'hyperliquid_network'` in `src/gui/pages/settings.py` by using safe dictionary access (`.get()`) for backward compatibility with older config files.
+- **Asset Configuration**: Removed `AAVE` from default assets in `.env` as it is not tradeable on the configured exchange/network, preventing API errors.
+
+### Fixed (Previous)
 - **Docker Deployment Crash**: Resolved an issue where the application would crash in Docker because it attempted to launch a native desktop window (`pywebview`) in a headless environment.
     - **Removed Dependency**: Removed `pywebview` from `requirements.txt` as it is not needed for the server-side deployment.
     - **Forced Headless Mode**: Modified `main.py` to strictly enforce `native=False` and `show=False` when running in Docker, preventing any attempts to interact with a display server.

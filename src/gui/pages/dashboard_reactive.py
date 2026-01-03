@@ -411,6 +411,13 @@ def create_dashboard(bot_service: BotService, state_manager: StateManager):
     # Initial render with current state
     initial_state = state_manager.get_state()
     on_state_update(initial_state)
+    
+    # Cleanup on disconnect (IMPORTANT: prevents orphan subscriptions)
+    def stop_subscription():
+        event_bus.unsubscribe(EventTypes.STATE_UPDATE, on_state_update)
+        event_bus.unsubscribe(EventTypes.TRADE_EXECUTED, on_trade_executed)
+        event_bus.unsubscribe(EventTypes.BOT_STARTED, on_bot_started)
+        event_bus.unsubscribe(EventTypes.BOT_STOPPED, on_bot_stopped)
 
-    # Log performance improvement
-    activity_log.push('✨ Using reactive dashboard (80% less CPU usage)')
+    # Return cleanup function to be called on navigation
+    return stop_subscription

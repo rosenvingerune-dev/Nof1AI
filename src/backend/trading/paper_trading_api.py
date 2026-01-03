@@ -639,34 +639,56 @@ class PaperTradingAPI:
                 {"name": "BTC", "szDecimals": 4},
                 {"name": "ETH", "szDecimals": 3},
                 {"name": "SOL", "szDecimals": 2},
+                {"name": "AVAX", "szDecimals": 2},
+                {"name": "SUI", "szDecimals": 1},
+                {"name": "AAVE", "szDecimals": 2},
+                {"name": "DOGE", "szDecimals": 0},
+                {"name": "ARB", "szDecimals": 1},
+                {"name": "OP", "szDecimals": 1},
+                {"name": "MATIC", "szDecimals": 1},
+                {"name": "LINK", "szDecimals": 2},
+                {"name": "ADA", "szDecimals": 1},
+                {"name": "DOT", "szDecimals": 2},
             ]
         }
 
         asset_ctxs = [
-            {"funding": "0.0001", "openInterest": "125000"},  # BTC
-            {"funding": "0.0005", "openInterest": "87000"},   # ETH
-            {"funding": "-0.0002", "openInterest": "45000"},  # SOL
+            {"funding": "0.0001", "openInterest": "12500000"},  # BTC
+            {"funding": "0.0005", "openInterest": "8700000"},   # ETH
+            {"funding": "-0.0002", "openInterest": "4500000"},  # SOL
+            {"funding": "0.0001", "openInterest": "200000"},   # AVAX
+            {"funding": "0.0003", "openInterest": "500000"},   # SUI
+            {"funding": "0.0002", "openInterest": "150000"},   # AAVE
+            {"funding": "0.0001", "openInterest": "10000000"}, # DOGE
+            {"funding": "0.0001", "openInterest": "800000"},   # ARB
+            {"funding": "0.0002", "openInterest": "600000"},   # OP
+            {"funding": "0.0001", "openInterest": "1200000"},  # MATIC
+            {"funding": "0.0001", "openInterest": "300000"},   # LINK
+            {"funding": "0.0001", "openInterest": "2500000"},  # ADA
+            {"funding": "0.0004", "openInterest": "400000"},   # DOT
         ]
 
         return [meta, asset_ctxs]
 
     async def get_funding_rate(self, asset: str) -> Optional[float]:
         """Mock funding rate."""
+        # Returns small positive funding by default for unknown assets
         rates = {
             "BTC": 0.0001,
             "ETH": 0.0005,
             "SOL": -0.0002,
         }
-        return rates.get(asset, 0.0)
+        return rates.get(asset, 0.0001)
 
     async def get_open_interest(self, asset: str) -> Optional[float]:
         """Mock open interest."""
         oi = {
-            "BTC": 125000,
-            "ETH": 87000,
-            "SOL": 45000,
+            "BTC": 12500000,
+            "ETH": 8700000,
+            "SOL": 4500000,
         }
-        return oi.get(asset)
+        # Return a generic OI if not found, to imply liquidity
+        return oi.get(asset, 500000.0)
 
     async def check_trigger_orders(self):
         """

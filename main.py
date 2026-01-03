@@ -37,15 +37,60 @@ if __name__ in {"__main__", "__mp_main__"}:
     # Register cleanup on exit
     atexit.register(cleanup)
 
-    # Import and setup app on startup
-    from src.gui.app import create_app
+    # Import app layout and pages
+    from src.gui.app import create_layout
     from src.gui.container import get_container
+    from src.gui.pages import (
+        dashboard_reactive as dashboard,
+        positions_reactive as positions,
+        history_optimized as history,
+        market,
+        reasoning,
+        settings,
+        recommendations,
+        logs
+    )
 
     # Save reference to bot_service for cleanup
     bot_service_ref = get_container().bot_service
 
-    # Call create_app to register all pages
-    create_app()
+    # --- DEFINE ROUTES (Multi-Page Architecture) ---
+
+    @ui.page('/')
+    def index():
+        ui.navigate.to('/dashboard')
+
+    @ui.page('/dashboard')
+    def page_dashboard():
+        create_layout(dashboard.create_dashboard, 'Dashboard')
+
+    @ui.page('/recommendations')
+    def page_recommendations():
+        create_layout(recommendations.create_recommendations, 'Recommendations')
+        
+    @ui.page('/positions')
+    def page_positions():
+        create_layout(positions.create_positions, 'Positions')
+
+    @ui.page('/history')
+    def page_history():
+        create_layout(history.create_history, 'History')
+
+    @ui.page('/market')
+    def page_market():
+        create_layout(market.create_market, 'Market')
+
+    @ui.page('/reasoning')
+    def page_reasoning():
+        create_layout(reasoning.create_reasoning, 'Reasoning')
+
+    @ui.page('/settings')
+    def page_settings():
+        create_layout(settings.create_settings, 'Settings')
+
+    @ui.page('/logs')
+    def page_logs():
+        create_layout(logs.create_logs, 'Logs')
 
     # Register shutdown handler with NiceGUI app
     async def on_app_shutdown():
@@ -53,15 +98,17 @@ if __name__ in {"__main__", "__mp_main__"}:
         print("[INFO] NiceGUI app shutdown event triggered")
         cleanup()
 
-    # Run in headless server mode (Docker friendly)
+    app.on_shutdown(on_app_shutdown)
 
+    # Run in headless server mode (Docker friendly)
     ui.run(
         native=False,
         show=False,
-        port=int(os.getenv('API_PORT', 8081)),
-        binding_refresh_interval=0.5,  # Reduce refresh rate to prevent UI freezing
-        reconnect_timeout=10.0,        # Allow longer reconnect time
+        port=int(os.getenv('API_PORT', 8082)),
+        binding_refresh_interval=0.1,  # Fast refresh for responsiveness
+        reconnect_timeout=3.0,
         reload=False,
-        title="AI Trading Bot (Docker)",
-        dark=True
+        title="AI Trading Bot",
+        dark=True,
+        favicon='🚀'
     )

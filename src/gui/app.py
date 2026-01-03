@@ -14,13 +14,10 @@ from src.gui.pages import dashboard_reactive as dashboard, positions_reactive as
 container = get_container()
 
 
-def create_app():
-    """Initialize and configure the NiceGUI application as single page"""
 
-    # Add Material Icons font
+def create_common_style():
+    """Add global styles and fonts"""
     ui.add_head_html('<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">')
-    
-    # Add global styles
     ui.add_head_html('''
         <style>
             * { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
@@ -42,47 +39,49 @@ def create_app():
         </style>
     ''')
 
+def create_layout(content_factory, active_page: str):
+    """
+    Create the standard application layout for a specific page.
+    This uses Multi-Page Architecture (MPA) for maximum stability.
+    Each page load is a fresh context.
+    
+    Args:
+        content_factory: Function that builds the page content
+        active_page: ID of the page to highlight in sidebar
+    """
+    create_common_style()
+
+    # Route handler
+    def handle_navigation(page_id: str):
+        # Map page IDs to routes
+        routes = {
+            'Dashboard': '/dashboard',
+            'Recommendations': '/recommendations',
+            'Positions': '/positions',
+            'History': '/history',
+            'Market': '/market',
+            'Reasoning': '/reasoning',
+            'Settings': '/settings',
+            'Logs': '/logs'
+        }
+        route = routes.get(page_id, '/dashboard')
+        ui.navigate.to(route)
+
     # Main layout
     with ui.column().classes('w-full h-screen p-0 gap-0 bg-slate-950'):
         create_header(container.state_manager)
 
         with ui.row().classes('w-full flex-grow overflow-hidden gap-0'):
-            # Sidebar with navigation
-            global sidebar_instance
-            sidebar_instance = Sidebar(on_navigate_callback=navigate)
+            # Sidebar with direct navigation
+            sidebar = Sidebar(on_navigate_callback=handle_navigation)
+            sidebar.set_active(active_page)
 
-            # Main content area (will be updated by navigation)
-            global content_container
-            content_container = ui.column().classes('flex-grow h-full p-8 overflow-y-auto items-start bg-slate-950')
+            # Main content area
+            with ui.column().classes('flex-grow h-full p-8 overflow-y-auto items-start bg-slate-950'):
+                # Build content
+                # Note: We pass container services here
+                if active_page == 'Logs':
+                    content_factory() # Logs doesn't need services
+                else:
+                    content_factory(container.bot_service, container.state_manager)
 
-    # Load default page
-    navigate('Dashboard')
-
-
-def navigate(page: str):
-    """Navigate to different page by clearing and recreating content"""
-    global content_container, sidebar_instance
-    
-    # Update active state in sidebar
-    if sidebar_instance:
-        sidebar_instance.set_active(page)
-
-    content_container.clear()
-
-    with content_container:
-        if page == 'Dashboard':
-            dashboard.create_dashboard(container.bot_service, container.state_manager)
-        elif page == 'Recommendations':
-            recommendations.create_recommendations(container.bot_service, container.state_manager)
-        elif page == 'Positions':
-            positions.create_positions(container.bot_service, container.state_manager)
-        elif page == 'History':
-            history.create_history(container.bot_service, container.state_manager)
-        elif page == 'Market':
-            market.create_market(container.bot_service, container.state_manager)
-        elif page == 'Reasoning':
-            reasoning.create_reasoning(container.bot_service, container.state_manager)
-        elif page == 'Settings':
-            settings.create_settings(container.bot_service, container.state_manager)
-        elif page == 'Logs':
-            logs.create_logs()

@@ -61,6 +61,10 @@ def create_recommendations(bot_service: BotService, state_manager: StateManager)
                         ui.label('AI will create proposals when the bot analyzes the market.').classes('text-gray-500')
             return
         
+        # Check if container still exists (user might have navigated away)
+        if proposals_container.is_deleted:
+            return
+        
         with proposals_container:
             for proposal in proposals:
                 create_proposal_card(proposal)
@@ -209,7 +213,13 @@ def create_recommendations(bot_service: BotService, state_manager: StateManager)
             ui.notify(f'Error: {str(e)}', type='negative')
     
     # Auto-refresh every 10 seconds
-    ui.timer(10.0, update_proposals)
+    timer = ui.timer(10.0, update_proposals)
+    
+    # Return cleanup function
+    def cleanup():
+        timer.cancel()
+        
+    return cleanup
     
     # Initial update
     # (timer will handle subsequent updates)
