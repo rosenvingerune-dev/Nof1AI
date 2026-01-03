@@ -339,10 +339,10 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                         max_position_slider = ui.slider(
                             min=100,
                             max=10000,
-                            value=config_data['risk_management']['max_position_size'],
+                            value=config_data['risk_management'].get('max_position_size', 1000),
                             step=100
                         ).classes('flex-grow')
-                        max_position_label = ui.label(f"${config_data['risk_management']['max_position_size']:,.0f}").classes('text-white font-bold min-w-[100px]')
+                        max_position_label = ui.label(f"${config_data['risk_management'].get('max_position_size', 1000):,.0f}").classes('text-white font-bold min-w-[100px]')
                         max_position_slider.on('update:model-value', lambda e: max_position_label.set_text(f'${e.args:,.0f}'))
                     ui.label('Maximum USD allocation per position').classes('text-xs text-gray-400')
 
@@ -354,10 +354,10 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                         max_leverage_slider = ui.slider(
                             min=1,
                             max=20,
-                            value=config_data['risk_management']['max_leverage'],
+                            value=config_data['risk_management'].get('max_leverage', 3),
                             step=0.5
                         ).classes('flex-grow')
-                        max_leverage_label = ui.label(f"{config_data['risk_management']['max_leverage']:.1f}x").classes('text-white font-bold min-w-[100px]')
+                        max_leverage_label = ui.label(f"{config_data['risk_management'].get('max_leverage', 3):.1f}x").classes('text-white font-bold min-w-[100px]')
                         max_leverage_slider.on('update:model-value', lambda e: max_leverage_label.set_text(f'{e.args:.1f}x'))
                     ui.label('Maximum leverage for perpetual futures (1x-20x)').classes('text-xs text-gray-400')
 
@@ -369,10 +369,10 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                         stop_loss_slider = ui.slider(
                             min=1,
                             max=20,
-                            value=config_data['risk_management']['stop_loss_pct'],
+                            value=config_data['risk_management'].get('stop_loss_pct', 5.0),
                             step=0.5
                         ).classes('flex-grow')
-                        stop_loss_label = ui.label(f"{config_data['risk_management']['stop_loss_pct']:.1f}%").classes('text-white font-bold min-w-[100px]')
+                        stop_loss_label = ui.label(f"{config_data['risk_management'].get('stop_loss_pct', 5.0):.1f}%").classes('text-white font-bold min-w-[100px]')
                         stop_loss_slider.on('update:model-value', lambda e: stop_loss_label.set_text(f'{e.args:.1f}%'))
                     ui.label('Default stop loss percentage from entry').classes('text-xs text-gray-400')
 
@@ -384,10 +384,10 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                         take_profit_slider = ui.slider(
                             min=2,
                             max=50,
-                            value=config_data['risk_management']['take_profit_pct'],
+                            value=config_data['risk_management'].get('take_profit_pct', 10.0),
                             step=1
                         ).classes('flex-grow')
-                        take_profit_label = ui.label(f"{config_data['risk_management']['take_profit_pct']:.0f}%").classes('text-white font-bold min-w-[100px]')
+                        take_profit_label = ui.label(f"{config_data['risk_management'].get('take_profit_pct', 10.0):.0f}%").classes('text-white font-bold min-w-[100px]')
                         take_profit_slider.on('update:model-value', lambda e: take_profit_label.set_text(f'{e.args:.0f}%'))
                     ui.label('Default take profit percentage from entry').classes('text-xs text-gray-400')
 
@@ -397,7 +397,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     ui.label('Maximum Open Positions').classes('text-lg font-semibold text-white')
                     max_positions_input = ui.number(
                         label='Max Positions',
-                        value=config_data['risk_management']['max_open_positions'],
+                        value=config_data['risk_management'].get('max_open_positions', 5),
                         min=1,
                         max=20
                     ).classes('w-full')
@@ -445,7 +445,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     ui.label('Desktop Notifications').classes('text-lg font-semibold text-white')
                     desktop_enabled_checkbox = ui.checkbox(
                         'Enable Desktop Notifications',
-                        value=config_data['notifications']['desktop_enabled']
+                        value=config_data['notifications'].get('desktop_enabled', True)
                     )
                     ui.label('Show system notifications for important events').classes('text-xs text-gray-400')
 
@@ -455,14 +455,14 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     ui.label('Telegram Notifications').classes('text-lg font-semibold text-white')
                     telegram_enabled_checkbox = ui.checkbox(
                         'Enable Telegram Notifications',
-                        value=config_data['notifications']['telegram_enabled']
+                        value=config_data['notifications'].get('telegram_enabled', False)
                     )
 
                     # Telegram token and chat ID (shown when enabled)
                     telegram_token_input = ui.input(
                         label='Telegram Bot Token',
                         placeholder='123456:ABC-DEF...',
-                        value=config_data['notifications']['telegram_token'],
+                        value=config_data['notifications'].get('telegram_token', ''),
                         password=True,
                         password_toggle_button=True
                     ).classes('w-full')
@@ -471,7 +471,7 @@ def create_settings(bot_service: BotService, state_manager: StateManager):
                     telegram_chat_input = ui.input(
                         label='Telegram Chat ID',
                         placeholder='123456789',
-                        value=config_data['notifications']['telegram_chat_id']
+                        value=config_data['notifications'].get('telegram_chat_id', '')
                     ).classes('w-full')
                     telegram_chat_input.visible = telegram_enabled_checkbox.value
 
