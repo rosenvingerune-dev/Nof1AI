@@ -18,6 +18,27 @@ export function TradesPage() {
                 <p className="text-muted-foreground">Historical record of all executed trades.</p>
             </div>
 
+            <div className="grid gap-4 md:grid-cols-3 mb-6">
+                <Card>
+                    <CardHeader className="py-4">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Trades</CardTitle>
+                        <div className="text-2xl font-bold">{trades.filter(t => t.action !== 'hold').length}</div>
+                    </CardHeader>
+                </Card>
+                <Card>
+                    <CardHeader className="py-4">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Buy Orders</CardTitle>
+                        <div className="text-2xl font-bold text-green-600">{trades.filter(t => t.action === 'buy').length}</div>
+                    </CardHeader>
+                </Card>
+                <Card>
+                    <CardHeader className="py-4">
+                        <CardTitle className="text-sm font-medium text-muted-foreground">Sell Orders</CardTitle>
+                        <div className="text-2xl font-bold text-red-600">{trades.filter(t => t.action === 'sell').length}</div>
+                    </CardHeader>
+                </Card>
+            </div>
+
             <Card>
                 <CardHeader>
                     <CardTitle>Execution Log</CardTitle>
@@ -45,7 +66,7 @@ export function TradesPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y">
-                                    {trades.map((trade) => (
+                                    {trades.filter(t => t.action !== 'hold').map((trade) => (
                                         <tr key={trade.id} className="hover:bg-muted/30 transition-colors">
                                             <td className="px-4 py-4 whitespace-nowrap text-muted-foreground text-xs font-mono">
                                                 {new Date(trade.timestamp).toLocaleString()}

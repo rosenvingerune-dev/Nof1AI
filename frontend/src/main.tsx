@@ -8,6 +8,7 @@ import { PositionsPage } from './pages/Positions'
 import { TradesPage } from './pages/Trades'
 import { MarketPage } from './pages/Market'
 import { SettingsPage } from './pages/Settings'
+import { RecommendationsPage } from './pages/Recommendations'
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
       {
         path: "market",
         element: <MarketPage />,
+      },
+      {
+        path: "recommendations",
+        element: <RecommendationsPage />,
       },
       {
         path: "settings",

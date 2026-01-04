@@ -37,7 +37,7 @@ export function DashboardPage() {
         return <div className="p-10 text-center">Loading bot state...</div>;
     }
 
-    const { is_running, balance, total_value, total_return_pct, sharpe_ratio, positions } = botState;
+    const { is_running, balance, sharpe_ratio, positions } = botState;
 
     return (
         <div className="space-y-6">
@@ -68,34 +68,44 @@ export function DashboardPage() {
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <StatCard
-                    title="Total Value"
-                    value={`$${(total_value || balance).toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-                    subtext={`${total_return_pct?.toFixed(2)}% Return`}
-                    trend={total_return_pct}
-                    icon={DollarSign}
-                />
-                <StatCard
-                    title="Active Positions"
-                    value={positions.length.toString()}
-                    subtext="Open trades"
-                    icon={Activity}
-                    trend={0}
-                />
-                <StatCard
-                    title="Sharpe Ratio"
-                    value={sharpe_ratio?.toFixed(2) || "0.00"}
-                    subtext="Risk-adjusted return"
-                    icon={TrendingUp}
-                    trend={sharpe_ratio} // Color green if positive
-                />
-                <StatCard
-                    title="Balance (Cash)"
-                    value={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
-                    subtext="Available liquidity"
-                    icon={DollarSign}
-                    trend={0}
-                />
+                {(() => {
+                    const investmentsValue = positions.reduce((acc, pos) => acc + (pos.current_price * pos.quantity), 0);
+                    const calculatedTotalBalance = balance + investmentsValue;
+                    const calculatedReturnPct = ((calculatedTotalBalance - 10000) / 10000) * 100;
+
+                    return (
+                        <>
+                            <StatCard
+                                title="Total Value"
+                                value={`$${calculatedTotalBalance.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                                subtext={`${calculatedReturnPct.toFixed(2)}% Return (from $10k)`}
+                                trend={calculatedReturnPct}
+                                icon={DollarSign}
+                            />
+                            <StatCard
+                                title="Active Positions"
+                                value={positions.length.toString()}
+                                subtext="Open trades"
+                                icon={Activity}
+                                trend={0}
+                            />
+                            <StatCard
+                                title="Sharpe Ratio"
+                                value={sharpe_ratio?.toFixed(2) || "0.00"}
+                                subtext="Risk-adjusted return"
+                                icon={TrendingUp}
+                                trend={sharpe_ratio} // Color green if positive
+                            />
+                            <StatCard
+                                title="Balance (Cash)"
+                                value={`$${balance.toLocaleString(undefined, { maximumFractionDigits: 2 })}`}
+                                subtext="Available liquidity"
+                                icon={DollarSign}
+                                trend={0}
+                            />
+                        </>
+                    );
+                })()}
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

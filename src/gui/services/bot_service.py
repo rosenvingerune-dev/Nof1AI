@@ -563,7 +563,9 @@ class BotService:
                 'telegram_token': CONFIG.get('telegram_token', ''),
                 'telegram_chat_id': CONFIG.get('telegram_chat_id', ''),
                 'trading_mode': CONFIG.get('trading_mode', 'manual'),
+                'trading_mode': CONFIG.get('trading_mode', 'manual'),
                 'auto_trade_enabled': CONFIG.get('auto_trade_enabled', False),
+                'auto_trade_threshold': CONFIG.get('auto_trade_threshold', 80.0),
             }
         except Exception as e:
             self.logger.error(f"Failed to get configuration: {e}")
@@ -582,6 +584,7 @@ class BotService:
                     'llm_model': CONFIG.get('llm_model', 'x-ai/grok-4'),
                     'trading_mode': CONFIG.get('trading_mode', 'manual'),
                     'auto_trade_enabled': CONFIG.get('auto_trade_enabled', False),
+                    'auto_trade_threshold': CONFIG.get('auto_trade_threshold', 80.0),
                 },
                 'api_keys': {
                     'taapi_api_key': CONFIG.get('taapi_api_key', ''),
@@ -627,6 +630,8 @@ class BotService:
                         CONFIG['trading_mode'] = data['strategy']['trading_mode']
                     if 'auto_trade_enabled' in data['strategy']:
                         CONFIG['auto_trade_enabled'] = data['strategy']['auto_trade_enabled']
+                    if 'auto_trade_threshold' in data['strategy']:
+                        CONFIG['auto_trade_threshold'] = data['strategy']['auto_trade_threshold']
 
                 # Load API keys
                 if 'api_keys' in data:

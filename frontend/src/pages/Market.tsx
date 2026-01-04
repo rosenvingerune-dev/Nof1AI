@@ -1,11 +1,10 @@
 import { useBotStore } from "@/stores/useBotStore";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { RefreshCw, TrendingUp, TrendingDown, Activity, BarChart3, Radio } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, Radio } from "lucide-react";
 
 export function MarketPage() {
-    const { botState, refreshMarket, isLoading } = useBotStore();
+    const { botState } = useBotStore();
 
     if (!botState) {
         return <div className="p-10 text-center">Loading market data...</div>;
@@ -14,6 +13,19 @@ export function MarketPage() {
     const { market_data } = botState;
     const assets = market_data ? Object.values(market_data) : [];
 
+    // Helper for simple formatting (this is just illustrative, real logic might need historical avg)
+    const getLevel = (value: number, type: 'volume' | 'oi') => {
+        if (!value) return { label: 'LOW', color: 'text-muted-foreground' };
+
+        // Arbitrary thresholds for demo purposes - in a real app these would be dynamic relative to asset norms
+        const thresholdHigh = type === 'volume' ? 500_000_000 : 100_000_000;
+        const thresholdMed = type === 'volume' ? 50_000_000 : 10_000_000;
+
+        if (value > thresholdHigh) return { label: 'HIGH', color: 'text-green-500' };
+        if (value > thresholdMed) return { label: 'MODERATE', color: 'text-yellow-500' };
+        return { label: 'LOW', color: 'text-muted-foreground' };
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -21,11 +33,24 @@ export function MarketPage() {
                     <h1 className="text-3xl font-bold tracking-tight">Market Data</h1>
                     <p className="text-muted-foreground">Real-time market analysis and technical indicators.</p>
                 </div>
-                <Button variant="outline" onClick={() => refreshMarket()} disabled={isLoading}>
-                    <RefreshCw className={cn("mr-2 h-4 w-4", isLoading && "animate-spin")} />
-                    Refresh Data
-                </Button>
             </div>
+
+            {/* Market Sentiment Summary - Moved UP as requested */}
+            {assets.length > 0 && (
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card className="bg-gradient-to-br from-blue-500/10 to-blue-900/10 border-blue-200/20">
+                        <CardHeader className="py-4 pb-2">
+                            <CardTitle className="text-sm font-medium text-muted-foreground">Market Sentiment</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {(assets.filter(a => (a.change_24h || 0) > 0).length > assets.length / 2) ? "Bullish" : "Bearish"}
+                            </div>
+                            <p className="text-xs text-muted-foreground">Based on 24h change</p>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
 
             {assets.length === 0 ? (
                 <Card>
@@ -56,19 +81,28 @@ export function MarketPage() {
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground text-xs uppercase tracking-wider">Volume (24h)</p>
-                                        <div className="flex items-center font-mono">
-                                            <BarChart3 className="w-3 h-3 mr-1 text-muted-foreground" />
-                                            ${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}
+                                <div className="space-y-3 text-sm">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-muted-foreground text-xs uppercase tracking-wider">Volume (24h)</span>
+                                        <div className="text-right">
+                                            <div className="font-mono">${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}</div>
+                                            <div className={cn("text-[10px] font-bold", getLevel(data.volume_24h || 0, 'volume').color)}>
+                                                {getLevel(data.volume_24h || 0, 'volume').label}
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <p className="text-muted-foreground text-xs uppercase tracking-wider">Funding Rate</p>
-                                        <div className="font-mono">
-                                            {(data.funding_rate || 0).toFixed(4)}%
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-muted-foreground text-xs uppercase tracking-wider">Open Interest</span>
+                                        <div className="text-right">
+                                            <div className="font-mono">${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}</div>
+                                            <div className={cn("text-[10px] font-bold", getLevel(data.open_interest || 0, 'oi').color)}>
+                                                {getLevel(data.open_interest || 0, 'oi').label}
+                                            </div>
                                         </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-muted-foreground text-xs uppercase tracking-wider">Funding Rate</span>
+                                        <div className="font-mono">{(data.funding_rate || 0).toFixed(6)}%</div>
                                     </div>
                                 </div>
 

@@ -19,6 +19,7 @@ export function Sidebar() {
         { to: "/positions", label: "Positions", icon: Activity },
         { to: "/trades", label: "Trade History", icon: History },
         { to: "/market", label: "Market Data", icon: LineChart },
+        { to: "/recommendations", label: "Recommendations", icon: Zap },
         { to: "/settings", label: "Settings", icon: Settings },
     ];
 

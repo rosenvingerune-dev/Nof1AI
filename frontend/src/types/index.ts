@@ -51,4 +51,5 @@ export interface Settings {
     trading_mode: 'auto' | 'manual';
     max_position_size?: number;
     auto_trade_enabled?: boolean;
+    auto_trade_threshold?: number;
 }

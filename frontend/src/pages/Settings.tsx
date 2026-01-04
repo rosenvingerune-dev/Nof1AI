@@ -146,6 +146,21 @@ export function SettingsPage() {
                         </div>
                     </div>
 
+                    {/* Auto Trade Confidence Threshold */}
+                    <div className="space-y-2">
+                        <Label htmlFor="threshold">Auto-Trade Confidence Threshold (%)</Label>
+                        <Input
+                            id="threshold"
+                            type="number"
+                            min="0"
+                            max="100"
+                            value={formData.auto_trade_threshold || 80}
+                            onChange={(e) => setFormData({ ...formData, auto_trade_threshold: parseFloat(e.target.value) || 80 })}
+                            placeholder="80"
+                        />
+                        <p className="text-sm text-muted-foreground">Minimum AI confidence required to automatically execute a trade (Default: 80%).</p>
+                    </div>
+
                     {message && (
                         <div className={cn(
                             "flex items-center p-3 rounded-md text-sm",
@@ -166,7 +181,7 @@ export function SettingsPage() {
                     </Button>
                 </CardFooter>
             </Card>
-        </div>
+        </div >
     );
 
     // Helper to wire up the Save button correctly passed as callback

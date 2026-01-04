@@ -55,5 +55,20 @@ export const BotAPI = {
     refreshMarket: async (): Promise<{ success: boolean }> => {
         const { data } = await api.post<{ success: boolean }>('/market/refresh');
         return data;
+    },
+
+    getProposals: async (): Promise<any[]> => {
+        const { data } = await api.get<any[]>('/proposals/');
+        return data;
+    },
+
+    approveProposal: async (id: string): Promise<{ success: boolean }> => {
+        const { data } = await api.post<{ success: boolean }>(`/proposals/${id}/approve`);
+        return data;
+    },
+
+    rejectProposal: async (id: string, reason: string): Promise<{ success: boolean }> => {
+        const { data } = await api.post<{ success: boolean }>(`/proposals/${id}/reject`, { reason });
+        return data;
     }
 };

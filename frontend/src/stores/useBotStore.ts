@@ -10,6 +10,7 @@ interface BotStore {
     isLoading: boolean;
     error: string | null;
     trades: Trade[]; // Historical trades
+    proposals: any[]; // Pending proposals
 
     // Actions
     fetchInitialState: () => Promise<void>;
@@ -24,6 +25,10 @@ interface BotStore {
     fetchTrades: () => Promise<void>;
     refreshMarket: () => Promise<void>;
     updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
+
+    fetchProposals: () => Promise<void>;
+    approveProposal: (id: string) => Promise<void>;
+    rejectProposal: (id: string, reason?: string) => Promise<void>;
 }
 
 export const useBotStore = create<BotStore>((set, get) => ({
@@ -33,6 +38,7 @@ export const useBotStore = create<BotStore>((set, get) => ({
     isLoading: false,
     error: null,
     trades: [],
+    proposals: [],
 
     fetchInitialState: async () => {
         set({ isLoading: true, error: null });
@@ -128,6 +134,35 @@ export const useBotStore = create<BotStore>((set, get) => ({
         } catch (err: any) {
             set({ error: "Failed to update settings" });
             throw err;
+        }
+    },
+
+    fetchProposals: async () => {
+        try {
+            const proposals = await BotAPI.getProposals();
+            set({ proposals });
+        } catch (err) {
+            console.error("Failed to fetch proposals", err);
+        }
+    },
+
+    approveProposal: async (id: string) => {
+        try {
+            await BotAPI.approveProposal(id);
+            // Refresh proposals list
+            await get().fetchProposals();
+        } catch (err: any) {
+            set({ error: "Failed to approve proposal" });
+        }
+    },
+
+    rejectProposal: async (id: string, reason: string = "User rejected") => {
+        try {
+            await BotAPI.rejectProposal(id, reason);
+            // Refresh proposals list
+            await get().fetchProposals();
+        } catch (err: any) {
+            set({ error: "Failed to reject proposal" });
         }
     }
 }));

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.api.routes import bot, positions, trades, market, settings, websocket
+from src.api.routes import bot, positions, trades, market, settings, websocket, proposals
 
 app = FastAPI(
     title="NOF1 Trading Bot API",
@@ -29,6 +29,7 @@ app.include_router(positions.router, prefix="/api/v1/positions", tags=["Position
 app.include_router(trades.router, prefix="/api/v1/trades", tags=["Trades"])
 app.include_router(market.router, prefix="/api/v1/market", tags=["Market"])
 app.include_router(settings.router, prefix="/api/v1/settings", tags=["Settings"])
+app.include_router(proposals.router, prefix="/api/v1/proposals", tags=["Proposals"])
 app.include_router(websocket.router, tags=["WebSocket"])
 
 @app.get("/")
