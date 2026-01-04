@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.0] - 2026-01-04
+
+### Added
+- **FastAPI Backend Foundation**: Implemented the core backend architecture to replace NiceGUI monolith.
+    - **API Structure**: Created `src/api` with modular routing (`bot`, `positions`, `trades`, `market`, `settings`).
+    - **REST Endpoints**: Implemented all core endpoints for bot control and data retrieval.
+    - **Swagger UI**: Auto-generated API documentation available at `/docs`.
+- **Real-time WebSocket**: Implemented `ConnectionManager` and WebSocket endpoint (`/ws`) for real-time frontend updates.
+- **EventBus Integration**: Connected `BotService` and `StateManager` to the new API layer using the existing Event Bus architecture (Pub/Sub).
+- **Documentation**: Added `docs/API.md` and `docs/openapi.json`.
+
+### Changed
+- **Architecture**: Decoupled backend logic from UI rendering, preparing for React frontend migration.
+
 ## [0.2.2] - 2026-01-03
 
 ### Fixed
