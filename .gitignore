@@ -52,4 +52,5 @@ data/paper_trading_state.json
 # Temporary files
 tmp/
 temp/
-*~data/diary.jsonl
+*~
+data/diary.jsonl
