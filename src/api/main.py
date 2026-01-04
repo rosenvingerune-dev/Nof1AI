@@ -5,7 +5,7 @@ from src.api.routes import bot, positions, trades, market, settings, websocket
 app = FastAPI(
     title="NOF1 Trading Bot API",
     description="Backend API for NOF1 Trading Bot",
-    version="1.0.0"
+    version="0.3.0"
 )
 
 # CORS Middleware

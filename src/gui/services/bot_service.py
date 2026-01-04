@@ -562,6 +562,8 @@ class BotService:
                 'telegram_notifications': CONFIG.get('telegram_notifications', False),
                 'telegram_token': CONFIG.get('telegram_token', ''),
                 'telegram_chat_id': CONFIG.get('telegram_chat_id', ''),
+                'trading_mode': CONFIG.get('trading_mode', 'manual'),
+                'auto_trade_enabled': CONFIG.get('auto_trade_enabled', False),
             }
         except Exception as e:
             self.logger.error(f"Failed to get configuration: {e}")
@@ -578,6 +580,8 @@ class BotService:
                     'assets': CONFIG.get('assets', 'BTC ETH'),
                     'interval': CONFIG.get('interval', '5m'),
                     'llm_model': CONFIG.get('llm_model', 'x-ai/grok-4'),
+                    'trading_mode': CONFIG.get('trading_mode', 'manual'),
+                    'auto_trade_enabled': CONFIG.get('auto_trade_enabled', False),
                 },
                 'api_keys': {
                     'taapi_api_key': CONFIG.get('taapi_api_key', ''),
@@ -619,6 +623,10 @@ class BotService:
                         CONFIG['interval'] = data['strategy']['interval']
                     if 'llm_model' in data['strategy']:
                         CONFIG['llm_model'] = data['strategy']['llm_model']
+                    if 'trading_mode' in data['strategy']:
+                        CONFIG['trading_mode'] = data['strategy']['trading_mode']
+                    if 'auto_trade_enabled' in data['strategy']:
+                        CONFIG['auto_trade_enabled'] = data['strategy']['auto_trade_enabled']
 
                 # Load API keys
                 if 'api_keys' in data:

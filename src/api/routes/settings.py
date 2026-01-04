@@ -10,6 +10,9 @@ class SettingsUpdate(BaseModel):
     assets: Optional[List[str]] = None
     interval: Optional[str] = None
     llm_model: Optional[str] = None
+    trading_mode: Optional[str] = None
+    max_position_size: Optional[float] = None
+    auto_trade_enabled: Optional[bool] = None
 
 @router.get("/")
 async def get_settings(bot_service: BotService = Depends(get_bot_service)):

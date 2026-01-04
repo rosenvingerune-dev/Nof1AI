@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { BotState, Settings } from '../types';
+import type { BotState, Settings, Trade } from '../types';
 import { BotAPI } from '../api/client';
 
 interface BotStore {
@@ -9,6 +9,7 @@ interface BotStore {
     isConnected: boolean; // WebSocket connection status
     isLoading: boolean;
     error: string | null;
+    trades: Trade[]; // Historical trades
 
     // Actions
     fetchInitialState: () => Promise<void>;
@@ -20,6 +21,8 @@ interface BotStore {
     stopBot: () => Promise<void>;
     closePosition: (asset: string) => Promise<void>;
     fetchSettings: () => Promise<void>;
+    fetchTrades: () => Promise<void>;
+    refreshMarket: () => Promise<void>;
     updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
 }
 
@@ -29,6 +32,7 @@ export const useBotStore = create<BotStore>((set, get) => ({
     isConnected: false,
     isLoading: false,
     error: null,
+    trades: [],
 
     fetchInitialState: async () => {
         set({ isLoading: true, error: null });
@@ -94,6 +98,25 @@ export const useBotStore = create<BotStore>((set, get) => ({
             set({ settings });
         } catch (err) {
             console.error("Failed to load settings", err);
+        }
+    },
+
+    fetchTrades: async () => {
+        try {
+            const trades = await BotAPI.getTrades();
+            set({ trades });
+        } catch (err) {
+            console.error("Failed to fetch trades", err);
+        }
+    },
+
+    refreshMarket: async () => {
+        try {
+            await BotAPI.refreshMarket();
+            // Optionally fetch state again if websocket doesn't push immediately
+            await get().fetchInitialState();
+        } catch (err) {
+            console.error("Failed to refresh market", err);
         }
     },
 
