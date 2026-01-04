@@ -1,0 +1,311 @@
+============================= test session starts =============================
+platform win32 -- Python 3.10.11, pytest-9.0.2, pluggy-1.6.0 -- C:\Users\Rune\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Rune\PycharmProjects\Nof1\nof1.ai-alpha-arena-nof1.ai-alpha-arena
+plugins: anyio-4.11.0, asyncio-1.3.0
+asyncio: mode=strict, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 11 items
+
+tests/api/test_routes.py::test_read_root ERROR                           [  9%]
+tests/api/test_routes.py::test_start_bot ERROR                           [ 18%]
+tests/api/test_routes.py::test_stop_bot ERROR                            [ 27%]
+tests/api/test_routes.py::test_get_positions ERROR                       [ 36%]
+tests/api/test_routes.py::test_close_position ERROR                      [ 45%]
+tests/api/test_routes.py::test_get_trades ERROR                          [ 54%]
+tests/api/test_routes.py::test_refresh_market_data ERROR                 [ 63%]
+tests/api/test_routes.py::test_get_settings ERROR                        [ 72%]
+tests/api/test_routes.py::test_update_settings ERROR                     [ 81%]
+tests/api/test_websocket.py::test_websocket_connection PASSED            [ 90%]
+tests/api/test_websocket.py::test_connection_manager_subscriptions PASSED [100%]
+
+=================================== ERRORS ====================================
+______________________ ERROR at setup of test_read_root _______________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_read_root>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+______________________ ERROR at setup of test_start_bot _______________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_start_bot>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+_______________________ ERROR at setup of test_stop_bot _______________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_stop_bot>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+____________________ ERROR at setup of test_get_positions _____________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_get_positions>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+____________________ ERROR at setup of test_close_position ____________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_close_position>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+______________________ ERROR at setup of test_get_trades ______________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_get_trades>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+_________________ ERROR at setup of test_refresh_market_data __________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_refresh_market_data>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+_____________________ ERROR at setup of test_get_settings _____________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_get_settings>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+___________________ ERROR at setup of test_update_settings ____________________
+
+fixturedef = <FixtureDef argname='mock_bot_service' scope='function' baseid='tests/api'>
+request = <SubRequest 'mock_bot_service' for <Function test_update_settings>>
+
+    @pytest.hookimpl(wrapper=True)
+    def pytest_fixture_setup(fixturedef: FixtureDef, request) -> object | None:
+        asyncio_mode = _get_asyncio_mode(request.config)
+        if not _is_asyncio_fixture_function(fixturedef.func):
+            if asyncio_mode == Mode.STRICT:
+                # Ignore async fixtures without explicit asyncio mark in strict mode
+                # This applies to pytest_trio fixtures, for example
+>               return (yield)
+
+..\..\..\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\pytest_asyncio\plugin.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    @pytest.fixture
+    def mock_bot_service():
+        service = MagicMock(spec=BotService)
+    
+        # Setup default return values
+>       service.get_state.return_value = BotState(
+            is_running=False,
+            balance=10000.0,
+            total_pnl=0.0,
+            positions=[]
+        )
+E       TypeError: BotState.__init__() got an unexpected keyword argument 'total_pnl'
+
+tests\api\conftest.py:15: TypeError
+=========================== short test summary info ===========================
+ERROR tests/api/test_routes.py::test_read_root - TypeError: BotState.__init__...
+ERROR tests/api/test_routes.py::test_start_bot - TypeError: BotState.__init__...
+ERROR tests/api/test_routes.py::test_stop_bot - TypeError: BotState.__init__(...
+ERROR tests/api/test_routes.py::test_get_positions - TypeError: BotState.__in...
+ERROR tests/api/test_routes.py::test_close_position - TypeError: BotState.__i...
+ERROR tests/api/test_routes.py::test_get_trades - TypeError: BotState.__init_...
+ERROR tests/api/test_routes.py::test_refresh_market_data - TypeError: BotStat...
+ERROR tests/api/test_routes.py::test_get_settings - TypeError: BotState.__ini...
+ERROR tests/api/test_routes.py::test_update_settings - TypeError: BotState.__...
+========================= 2 passed, 9 errors in 0.59s =========================
