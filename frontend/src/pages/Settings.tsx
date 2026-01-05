@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+
 import { cn } from "@/lib/utils";
 import { Save, AlertCircle, RefreshCw } from "lucide-react";
 import type { Settings } from "@/types";
@@ -112,37 +112,45 @@ export function SettingsPage() {
                         <p className="text-sm text-muted-foreground">Maximum capital allocated per position (0 for no limit).</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                        {/* Trading Mode */}
-                        <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Trading Mode</Label>
-                                <div className="text-sm text-muted-foreground">
-                                    Set to Auto for autonomous execution.
-                                </div>
+                    {/* Operation Mode - Unified Control */}
+                    <div className="space-y-3 pt-2">
+                        <Label>Operation Mode</Label>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Manual Mode */}
+                            <div
+                                className={cn(
+                                    "cursor-pointer rounded-lg border-2 p-4 transition-all hover:bg-muted/50",
+                                    formData.trading_mode === 'manual' ? "border-primary bg-primary/5" : "border-muted"
+                                )}
+                                onClick={() => setFormData({ ...formData, trading_mode: 'manual', auto_trade_enabled: false })}
+                            >
+                                <div className="font-semibold text-foreground">Manual</div>
+                                <div className="text-xs text-muted-foreground mt-1">Bot is disabled. You trade manually.</div>
                             </div>
-                            <div className="flex items-center space-x-2">
-                                <span className={cn("text-sm", formData.trading_mode === 'manual' ? "font-bold" : "text-muted-foreground")}>Manual</span>
-                                <Switch
-                                    checked={formData.trading_mode === 'auto'}
-                                    onCheckedChange={(checked) => setFormData({ ...formData, trading_mode: checked ? 'auto' : 'manual' })}
-                                />
-                                <span className={cn("text-sm", formData.trading_mode === 'auto' ? "font-bold" : "text-muted-foreground")}>Auto</span>
-                            </div>
-                        </div>
 
-                        {/* Auto Trade Enabled (Master Switch) */}
-                        <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                            <div className="space-y-0.5">
-                                <Label className="text-base">Master Switch</Label>
-                                <div className="text-sm text-muted-foreground">
-                                    Enable/Disable all automatic trading activities.
-                                </div>
+                            {/* Assistant / Semi-Auto */}
+                            <div
+                                className={cn(
+                                    "cursor-pointer rounded-lg border-2 p-4 transition-all hover:bg-muted/50",
+                                    (formData.trading_mode === 'auto' && !formData.auto_trade_enabled) ? "border-primary bg-primary/5" : "border-muted"
+                                )}
+                                onClick={() => setFormData({ ...formData, trading_mode: 'auto', auto_trade_enabled: false })}
+                            >
+                                <div className="font-semibold text-foreground">Assistant</div>
+                                <div className="text-xs text-muted-foreground mt-1">Bot suggests trades. You approve execution.</div>
                             </div>
-                            <Switch
-                                checked={formData.auto_trade_enabled ?? false}
-                                onCheckedChange={(checked) => setFormData({ ...formData, auto_trade_enabled: checked })}
-                            />
+
+                            {/* Fully Autonomous */}
+                            <div
+                                className={cn(
+                                    "cursor-pointer rounded-lg border-2 p-4 transition-all hover:bg-muted/50",
+                                    (formData.trading_mode === 'auto' && formData.auto_trade_enabled) ? "border-primary bg-primary/5" : "border-muted"
+                                )}
+                                onClick={() => setFormData({ ...formData, trading_mode: 'auto', auto_trade_enabled: true })}
+                            >
+                                <div className="font-semibold text-foreground">Autonomous</div>
+                                <div className="text-xs text-muted-foreground mt-1">Bot trades automatically 24/7.</div>
+                            </div>
                         </div>
                     </div>
 

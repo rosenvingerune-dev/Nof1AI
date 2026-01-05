@@ -1,8 +1,19 @@
 import { useBotStore } from "@/stores/useBotStore";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, XCircle, AlertCircle } from "lucide-react";
+import { X, LineChart, AlertCircle } from "lucide-react";
+
+function InfoCard({ title, value, subtext, className }: { title: string, value: string, subtext: string, className?: string }) {
+    return (
+        <Card className={cn("border-none shadow-md", className)}>
+            <CardContent className="p-6">
+                <div className="text-4xl font-bold mb-1">{value}</div>
+                <div className="text-sm opacity-90 font-medium mb-4">{title}</div>
+                <div className="text-xs opacity-75">{subtext}</div>
+            </CardContent>
+        </Card>
+    )
+}
 
 export function PositionsPage() {
     const { botState, closePosition } = useBotStore();
@@ -13,6 +24,11 @@ export function PositionsPage() {
 
     const { positions } = botState;
 
+    // Calculate Summary Stats
+    const totalPositions = positions.length;
+    const totalUnrealizedPnL = positions.reduce((acc, pos) => acc + pos.unrealized_pnl, 0);
+    const totalExposure = positions.reduce((acc, pos) => acc + (pos.current_price * Math.abs(pos.quantity)), 0);
+
     const handleClosePosition = async (symbol: string) => {
         if (confirm(`Are you sure you want to close the position for ${symbol}?`)) {
             await closePosition(symbol);
@@ -22,18 +38,37 @@ export function PositionsPage() {
     return (
         <div className="space-y-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Positions</h1>
-                <p className="text-muted-foreground">Manage and view detailed status of open positions.</p>
+                <h1 className="text-3xl font-bold tracking-tight">Active Positions</h1>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Active Positions</CardTitle>
-                    <CardDescription>
-                        Real-time overview of your current market exposure.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <InfoCard
+                    title="Total Positions"
+                    value={totalPositions.toString()}
+                    subtext="Open trades"
+                    className="bg-blue-600 text-white"
+                />
+                <InfoCard
+                    title="Unrealized PnL"
+                    value={`${totalUnrealizedPnL >= 0 ? "+" : ""}$${Math.abs(totalUnrealizedPnL).toFixed(2)}`}
+                    subtext="Total Profit/Loss"
+                    className="bg-purple-600 text-white"
+                />
+                <InfoCard
+                    title="Total Exposure"
+                    value={`$${totalExposure.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                    subtext="Market Value"
+                    className="bg-indigo-900 text-white"
+                />
+            </div>
+
+            {/* Detailed Table */}
+            <Card className="border shadow-sm">
+                <div className="p-4 border-b bg-muted/40 font-semibold flex items-center">
+                    Position Details
+                </div>
+                <CardContent className="p-0">
                     {positions.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-12 text-muted-foreground space-y-3">
                             <AlertCircle className="h-10 w-10 opacity-50" />
@@ -42,53 +77,72 @@ export function PositionsPage() {
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm text-left">
-                                <thead className="bg-muted/50 text-muted-foreground uppercase text-xs">
+                                <thead className="bg-[#1a1a1a] text-gray-400 uppercase text-xs">
                                     <tr>
-                                        <th className="px-4 py-3 rounded-tl-md">Asset</th>
-                                        <th className="px-4 py-3">Side</th>
-                                        <th className="px-4 py-3 text-right">Size</th>
-                                        <th className="px-4 py-3 text-right">Entry Price</th>
-                                        <th className="px-4 py-3 text-right">Mark Price</th>
-                                        <th className="px-4 py-3 text-right">Unrealized PnL</th>
-                                        <th className="px-4 py-3 text-right rounded-tr-md">Actions</th>
+                                        <th className="px-4 py-3 font-medium">Asset</th>
+                                        <th className="px-4 py-3 font-medium">Side</th>
+                                        <th className="px-4 py-3 font-medium text-right">Size</th>
+                                        <th className="px-4 py-3 font-medium text-right">Entry Price</th>
+                                        <th className="px-4 py-3 font-medium text-right">Current Price</th>
+                                        <th className="px-4 py-3 font-medium text-right">Unrealized PnL</th>
+                                        <th className="px-4 py-3 font-medium text-right">PnL %</th>
+                                        <th className="px-4 py-3 font-medium text-center">Leverage</th>
+                                        <th className="px-4 py-3 font-medium text-right">Liq. Price</th>
+                                        <th className="px-4 py-3 font-medium text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y">
-                                    {positions.map((pos) => (
-                                        <tr key={pos.symbol} className="hover:bg-muted/30 transition-colors">
-                                            <td className="px-4 py-4 font-medium">{pos.symbol}</td>
-                                            <td className="px-4 py-4">
-                                                <span className={cn(
-                                                    "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ring-1 ring-inset",
-                                                    pos.quantity > 0
-                                                        ? "bg-green-50 text-green-700 ring-green-600/20"
-                                                        : "bg-red-50 text-red-700 ring-red-600/20"
-                                                )}>
-                                                    {pos.quantity > 0 ? "LONG" : "SHORT"}
-                                                </span>
-                                            </td>
-                                            <td className="px-4 py-4 text-right font-mono">{Math.abs(pos.quantity)}</td>
-                                            <td className="px-4 py-4 text-right font-mono">${pos.entry_price.toLocaleString()}</td>
-                                            <td className="px-4 py-4 text-right font-mono">${pos.current_price.toLocaleString()}</td>
-                                            <td className={cn("px-4 py-4 text-right font-mono font-medium", pos.unrealized_pnl >= 0 ? "text-green-600" : "text-red-600")}>
-                                                <div className="flex items-center justify-end gap-1">
-                                                    {pos.unrealized_pnl >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                                                    {pos.unrealized_pnl > 0 ? "+" : ""}{pos.unrealized_pnl.toFixed(2)}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-4 text-right">
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    onClick={() => handleClosePosition(pos.symbol)}
-                                                    className="h-8 px-2 lg:px-3"
-                                                >
-                                                    <XCircle className="h-3.5 w-3.5 sm:mr-2" />
-                                                    <span className="hidden sm:inline">Close</span>
-                                                </Button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                <tbody className="divide-y divide-border/50 bg-[#0a0a0a]">
+                                    {positions.map((pos) => {
+                                        const pnlPercent = (pos.unrealized_pnl / (pos.entry_price * Math.abs(pos.quantity))) * 100;
+                                        const side = pos.quantity >= 0 ? "LONG" : "SHORT";
+
+                                        return (
+                                            <tr key={pos.symbol} className="group hover:bg-muted/10 transition-colors">
+                                                <td className="px-4 py-3 font-bold text-white">{pos.symbol}</td>
+                                                <td className="px-4 py-3">
+                                                    <span className={cn(
+                                                        "inline-flex items-center rounded px-2 py-0.5 text-xs font-bold uppercase",
+                                                        side === "LONG"
+                                                            ? "bg-green-500/20 text-green-500 border border-green-500/30"
+                                                            : "bg-red-500/20 text-red-500 border border-red-500/30"
+                                                    )}>
+                                                        {side}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">{Math.abs(pos.quantity)}</td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">${pos.entry_price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">${pos.current_price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+
+                                                {/* PnL Value */}
+                                                <td className={cn("px-4 py-3 text-right font-mono font-bold", pos.unrealized_pnl >= 0 ? "text-green-500" : "text-red-500")}>
+                                                    {pos.unrealized_pnl >= 0 ? "+" : ""}{pos.unrealized_pnl.toFixed(2)}
+                                                </td>
+
+                                                {/* PnL % */}
+                                                <td className={cn("px-4 py-3 text-right font-mono text-xs", pnlPercent >= 0 ? "text-green-500" : "text-red-500")}>
+                                                    {pnlPercent >= 0 ? "+" : ""}{pnlPercent.toFixed(2)}%
+                                                </td>
+
+                                                <td className="px-4 py-3 text-center text-gray-400 font-mono">{pos.leverage || 1}</td>
+                                                <td className="px-4 py-3 text-right text-gray-400 font-mono">{pos.liquidation_price ? `$${pos.liquidation_price}` : "0"}</td>
+
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className="flex justify-end gap-3">
+                                                        <button className="text-blue-500 hover:text-blue-400 transition-colors" title="View Chart">
+                                                            <LineChart className="h-4 w-4" />
+                                                        </button>
+                                                        <button
+                                                            className="text-red-500 hover:text-red-400 transition-colors"
+                                                            onClick={() => handleClosePosition(pos.symbol)}
+                                                            title="Close Position"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

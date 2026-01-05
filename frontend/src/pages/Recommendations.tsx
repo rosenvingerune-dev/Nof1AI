@@ -6,6 +6,8 @@ import { Progress } from "@/components/ui/progress";
 import { Info, Check, X, TrendingUp, TrendingDown, Brain, Pause } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { InfoCard } from "@/components/InfoCard";
+
 export function RecommendationsPage() {
     const {
         proposals,
@@ -67,18 +69,19 @@ export function RecommendationsPage() {
                 </div>
             </div>
 
+
+
+            // ... (inside component)
+
             {/* Stats Row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Card className="bg-gradient-to-br from-purple-500/10 to-purple-900/10 border-purple-200/20">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Proposals</CardTitle>
-                        <Brain className="h-4 w-4 text-purple-500" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{proposals.length}</div>
-                        <p className="text-xs text-muted-foreground">Waiting for review</p>
-                    </CardContent>
-                </Card>
+                <InfoCard
+                    title="Pending Proposals"
+                    value={proposals.length.toString()}
+                    subtext="Waiting for review"
+                    icon={Brain}
+                    className="bg-purple-600"
+                />
             </div>
 
             {/* Proposals List */}

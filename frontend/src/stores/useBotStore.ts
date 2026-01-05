@@ -45,10 +45,9 @@ export const useBotStore = create<BotStore>((set, get) => ({
         try {
             const state = await BotAPI.getStatus();
             set({ botState: state, isLoading: false });
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to fetch bot status", err);
-            // Don't set global error yet, retry silently or handle gracefully
-            set({ isLoading: false });
+            set({ isLoading: false, error: err.message || "Failed to connect to backend" });
         }
     },
 
