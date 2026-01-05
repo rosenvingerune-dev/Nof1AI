@@ -43,3 +43,29 @@ The system is now a fully integrated trading assistant where:
 - Portfolio state is persistent across sessions.
 - Market data is calculated continuously and displayed with intuitive visual cues.
 - The codebase is secured and backed up to GitHub.
+
+### 4. Bug Fixes and Stabilization (Latest)
+- **Short-Close Fix:** Fixed critical 'ZeroDivisionError' in `paper_trading_api` that crashed the bot when attempting to close a short position.
+- **Immediate Balance Update:** Extended `_update_bot_account_state` to update both positions and balance (Balance + Equity) immediately after trade execution/closure.
+- **JSON Error Fix:** Increased `max_output_tokens` to 8192 for Gemini and adjusted prompt to avoid long reasonings being cut off.
+- **UI Polish:** 
+  - Added version number (v1.01) in header.
+  - Added Tooltip to 'Error' badge for easier debugging.
+  - Ensured error messages ('Error') disappear automatically when the next run performs successfully.
+
+
+### Update - Phase 2: Confidence & Risk Assurance (v1.02)
+- **Settings:** Cleaned up GUI. Removed 'Grok/OpenAI' and 'Reasoning Tokens' which are not supported. Added Gemini Flash/Pro selection.
+- **Risk Management:** Implemented hard limit (`max_position_size`) in `bot_engine.py`. Bot now overrides AI if it suggests amounts that are too large. Risk settings update immediately without restart.
+- **AI Logic / Confidence:**
+  - Updated JSON Schema in `gemini_decision_maker.py` to include mandatory `confidence` (0-100).
+  - Updated System Prompt with scoring rules (0-50: Weak, 51-75: Moderate, 76-90: Strong, 91-100: A+).
+- **Docker/Plan:** Created `ASSESSMENT_AND_PLAN.md` with strategy for Containerization and Autotrading.
+
+
+### Update - Phase 3: Auto-Trading UI & Logic (v1.03)
+- **Settings UI:** Fixed bug where old config files crashed the page. Added full support for Auto-Trading configuration.
+- **Auto-Trading Logic:** Implemented 'Hybrid Mode' in `bot_engine.py`.
+  - If Confidence >= Threshold (e.g. 85%) AND Auto-Trade is ON: **EXECUTE TRADE**.
+  - Else: **CREATE PROPOSAL** (Manual approval).
+- **Status:** System runs live with Auto-Trading activated (Threshold: 85%).
