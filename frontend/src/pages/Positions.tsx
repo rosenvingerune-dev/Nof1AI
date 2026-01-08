@@ -109,9 +109,9 @@ export function PositionsPage() {
                                                         {side}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-right font-mono text-gray-300">{Math.abs(pos.quantity)}</td>
-                                                <td className="px-4 py-3 text-right font-mono text-gray-300">${pos.entry_price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                                                <td className="px-4 py-3 text-right font-mono text-gray-300">${pos.current_price.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">{Math.abs(pos.quantity).toFixed(4)}</td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">${pos.entry_price.toLocaleString(undefined, { maximumFractionDigits: pos.entry_price > 10 ? 0 : 2 })}</td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">${pos.current_price.toLocaleString(undefined, { maximumFractionDigits: pos.current_price > 10 ? 0 : 2 })}</td>
 
                                                 {/* PnL Value */}
                                                 <td className={cn("px-4 py-3 text-right font-mono font-bold", pos.unrealized_pnl >= 0 ? "text-green-500" : "text-red-500")}>
