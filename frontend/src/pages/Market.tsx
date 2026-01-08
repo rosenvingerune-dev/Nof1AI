@@ -1,18 +1,34 @@
+import { useEffect, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useBotStore } from "@/stores/useBotStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { TrendingUp, TrendingDown, Activity, BarChart3, PieChart } from "lucide-react";
 import { InfoCard } from "@/components/InfoCard";
+import { AdvancedRealTimeChart } from "react-ts-tradingview-widgets";
 
 export function MarketPage() {
     const { botState } = useBotStore();
+    const [searchParams] = useSearchParams();
+    const highlightAsset = searchParams.get('asset');
+    const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+
+    const { market_data } = botState || {};
+    const assets = market_data ? Object.values(market_data) : [];
+
+    // Scroll to highlighted asset
+    useEffect(() => {
+        if (highlightAsset && rowRefs.current[highlightAsset]) {
+            // Short delay to allow chart to render/layout shift
+            setTimeout(() => {
+                rowRefs.current[highlightAsset]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 500);
+        }
+    }, [highlightAsset, assets]);
 
     if (!botState) {
         return <div className="p-10 text-center">Loading market data...</div>;
     }
-
-    const { market_data } = botState;
-    const assets = market_data ? Object.values(market_data) : [];
 
     // Calculate Summary Stats
     const bullishCount = assets.filter(a => (a.change_24h || 0) > 0).length;
@@ -43,6 +59,31 @@ export function MarketPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Market Data</h1>
                 <p className="text-muted-foreground">Real-time market analysis and technical indicators.</p>
             </div>
+
+            {/* TradingView Chart Integration */}
+            {highlightAsset && (
+                <div className="border border-border/50 rounded-lg overflow-hidden shadow-2xl bg-card">
+                    <div className="h-[500px] w-full">
+                        <AdvancedRealTimeChart
+                            key={highlightAsset} // Force re-render on asset change
+                            symbol={`${highlightAsset}USDT`}
+                            theme="dark"
+                            autosize
+                            interval="60"
+                            timezone="Etc/UTC"
+                            style="1"
+                            locale="en"
+                            toolbar_bg="#1e1e1e"
+                            enable_publishing={false}
+                            hide_side_toolbar={false}
+                            allow_symbol_change={true}
+                            details={true}
+                            hotlist={true}
+                            calendar={true}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Summary Cards */}
             <div className="grid gap-4 md:grid-cols-3">
@@ -96,44 +137,57 @@ export function MarketPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-border/50 bg-[#0a0a0a]">
-                                    {assets.map((data) => (
-                                        <tr key={data.asset} className="hover:bg-muted/10 transition-colors">
-                                            <td className="px-4 py-3 font-bold text-white">{data.asset}</td>
-                                            <td className="px-4 py-3 text-right font-mono text-gray-300">
-                                                ${data.current_price.toLocaleString(undefined, { maximumFractionDigits: data.current_price > 10 ? 0 : 2 })}
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
-                                                <div className={cn(
-                                                    "inline-flex items-center justify-end font-mono font-medium",
-                                                    (data.change_24h || 0) >= 0 ? "text-green-500" : "text-red-500"
-                                                )}>
-                                                    {(data.change_24h || 0) >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                                    {Math.abs(data.change_24h || 0).toFixed(2)}%
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-mono text-gray-400">
-                                                <div>${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}</div>
-                                                <div className={cn("text-[10px] font-bold uppercase", getLevel(data.volume_24h || 0, 'volume').color)}>
-                                                    {getLevel(data.volume_24h || 0, 'volume').label}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-mono text-gray-400">
-                                                <div>${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}</div>
-                                                <div className={cn("text-[10px] font-bold uppercase", getLevel(data.open_interest || 0, 'oi').color)}>
-                                                    {getLevel(data.open_interest || 0, 'oi').label}
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-mono text-yellow-500/80">
-                                                {(data.funding_rate || 0).toFixed(6)}%
-                                            </td>
-                                            <td className={cn("px-4 py-3 text-right font-mono font-bold", getRsiColor(data.intraday?.rsi14 || 50))}>
-                                                {data.intraday?.rsi14?.toFixed(1) || "-"}
-                                            </td>
-                                            <td className="px-4 py-3 text-right font-mono text-blue-400">
-                                                ${data.intraday?.ema20?.toLocaleString(undefined, { maximumFractionDigits: (data.intraday?.ema20 || 0) > 10 ? 0 : 2 }) || "-"}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {assets.map((data) => {
+                                        const isHighlighted = data.asset === highlightAsset;
+                                        return (
+                                            <tr
+                                                key={data.asset}
+                                                className={cn(
+                                                    "transition-colors",
+                                                    isHighlighted ? "bg-blue-500/20 hover:bg-blue-500/30 ring-1 ring-inset ring-blue-500/50" : "hover:bg-muted/10"
+                                                )}
+                                                ref={(el) => { rowRefs.current[data.asset] = el; }}
+                                            >
+                                                <td className="px-4 py-3 font-bold text-white">
+                                                    {data.asset}
+                                                    {isHighlighted && <span className="ml-2 text-[10px] uppercase bg-blue-500 text-white px-1.5 py-0.5 rounded">Selected</span>}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-300">
+                                                    ${data.current_price.toLocaleString(undefined, { maximumFractionDigits: data.current_price > 10 ? 0 : 2 })}
+                                                </td>
+                                                <td className="px-4 py-3 text-right">
+                                                    <div className={cn(
+                                                        "inline-flex items-center justify-end font-mono font-medium",
+                                                        (data.change_24h || 0) >= 0 ? "text-green-500" : "text-red-500"
+                                                    )}>
+                                                        {(data.change_24h || 0) >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                                                        {Math.abs(data.change_24h || 0).toFixed(2)}%
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-400">
+                                                    <div>${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}</div>
+                                                    <div className={cn("text-[10px] font-bold uppercase", getLevel(data.volume_24h || 0, 'volume').color)}>
+                                                        {getLevel(data.volume_24h || 0, 'volume').label}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-400">
+                                                    <div>${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}</div>
+                                                    <div className={cn("text-[10px] font-bold uppercase", getLevel(data.open_interest || 0, 'oi').color)}>
+                                                        {getLevel(data.open_interest || 0, 'oi').label}
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-yellow-500/80">
+                                                    {(data.funding_rate || 0).toFixed(6)}%
+                                                </td>
+                                                <td className={cn("px-4 py-3 text-right font-mono font-bold", getRsiColor(data.intraday?.rsi14 || 50))}>
+                                                    {data.intraday?.rsi14?.toFixed(1) || "-"}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-blue-400">
+                                                    ${data.intraday?.ema20?.toLocaleString(undefined, { maximumFractionDigits: (data.intraday?.ema20 || 0) > 10 ? 0 : 2 }) || "-"}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
