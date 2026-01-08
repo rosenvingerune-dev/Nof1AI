@@ -814,6 +814,7 @@ class TradingBotEngine:
                     quantity = abs(pos['quantity'])
                     if quantity > 0:
                         # Close position (reverse direction)
+                        current_price = await self.exchange.get_current_price(asset)
                         if pos['quantity'] > 0:  # Long position
                             await self.exchange.place_sell_order(asset, quantity)
                         else:  # Short position
@@ -828,9 +829,20 @@ class TradingBotEngine:
                             'timestamp': datetime.now(timezone.utc).isoformat(),
                             'asset': asset,
                             'action': 'manual_close',
-                            'quantity': quantity,
+                            'amount': quantity,
+                            'price': current_price,
                             'note': 'Position closed manually via GUI'
                         })
+
+                        # Notify GUI of trade
+                        if self.on_trade_executed:
+                            self.on_trade_executed({
+                                'asset': asset,
+                                'action': 'manual_close',
+                                'amount': quantity,
+                                'price': current_price,
+                                'timestamp': datetime.now(timezone.utc).isoformat()
+                            })
 
                         self.logger.info(f"Manually closed position: {asset}")
                         
