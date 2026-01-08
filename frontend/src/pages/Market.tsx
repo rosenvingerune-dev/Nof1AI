@@ -1,7 +1,8 @@
 import { useBotStore } from "@/stores/useBotStore";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Activity, Radio } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3, PieChart } from "lucide-react";
+import { InfoCard } from "@/components/InfoCard";
 
 export function MarketPage() {
     const { botState } = useBotStore();
@@ -13,124 +14,114 @@ export function MarketPage() {
     const { market_data } = botState;
     const assets = market_data ? Object.values(market_data) : [];
 
-    // Helper for simple formatting (this is just illustrative, real logic might need historical avg)
-    const getLevel = (value: number, type: 'volume' | 'oi') => {
-        if (!value) return { label: 'LOW', color: 'text-muted-foreground' };
+    // Calculate Summary Stats
+    const bullishCount = assets.filter(a => (a.change_24h || 0) > 0).length;
+    const isBullish = bullishCount > assets.length / 2;
+    const totalVolume = assets.reduce((acc, a) => acc + (a.volume_24h || 0), 0);
 
-        // Arbitrary thresholds for demo purposes - in a real app these would be dynamic relative to asset norms
-        const thresholdHigh = type === 'volume' ? 500_000_000 : 100_000_000;
-        const thresholdMed = type === 'volume' ? 50_000_000 : 10_000_000;
-
-        if (value > thresholdHigh) return { label: 'HIGH', color: 'text-green-500' };
-        if (value > thresholdMed) return { label: 'MODERATE', color: 'text-yellow-500' };
-        return { label: 'LOW', color: 'text-muted-foreground' };
+    const getRsiColor = (rsi: number) => {
+        if (rsi > 70) return "text-red-500";
+        if (rsi < 30) return "text-green-500";
+        return "text-gray-400";
     };
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Market Data</h1>
-                    <p className="text-muted-foreground">Real-time market analysis and technical indicators.</p>
-                </div>
+            <div>
+                <h1 className="text-3xl font-bold tracking-tight">Market Data</h1>
+                <p className="text-muted-foreground">Real-time market analysis and technical indicators.</p>
             </div>
 
-            {/* Market Sentiment Summary - Moved UP as requested */}
-            {assets.length > 0 && (
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                    <Card className="bg-gradient-to-br from-blue-500/10 to-blue-900/10 border-blue-200/20">
-                        <CardHeader className="py-4 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">Market Sentiment</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">
-                                {(assets.filter(a => (a.change_24h || 0) > 0).length > assets.length / 2) ? "Bullish" : "Bearish"}
-                            </div>
-                            <p className="text-xs text-muted-foreground">Based on 24h change</p>
-                        </CardContent>
-                    </Card>
-                </div>
-            )}
+            {/* Summary Cards */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <InfoCard
+                    title="Market Sentiment"
+                    value={isBullish ? "Bullish" : "Bearish"}
+                    subtext={`${bullishCount} of ${assets.length} assets up`}
+                    icon={PieChart}
+                    className={isBullish ? "bg-green-600/20 text-green-500 border-green-500/30" : "bg-red-600/20 text-red-500 border-red-500/30"}
+                />
+                <InfoCard
+                    title="Total Volume (24h)"
+                    value={`$${totalVolume.toLocaleString(undefined, { notation: "compact", maximumFractionDigits: 1 })}`}
+                    subtext="Aggregate market volume"
+                    icon={BarChart3}
+                    className="bg-blue-600 text-white"
+                />
+                <InfoCard
+                    title="Assets Monitored"
+                    value={assets.length.toString()}
+                    subtext="Active markets"
+                    icon={Activity}
+                    className="bg-purple-600 text-white"
+                />
+            </div>
 
-            {assets.length === 0 ? (
-                <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-muted-foreground space-y-3">
-                        <Activity className="h-10 w-10 opacity-50" />
-                        <p>No market data available. Bot might be actively trading in a different mode or initializing.</p>
-                    </CardContent>
-                </Card>
-            ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {assets.map((data) => (
-                        <Card key={data.asset} className="bg-card/50 backdrop-blur-sm border-muted/60">
-                            <CardHeader className="pb-3">
-                                <div className="flex items-center justify-between">
-                                    <CardTitle className="text-xl font-bold">{data.asset}</CardTitle>
-                                    <div className={cn(
-                                        "flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium",
-                                        (data.change_24h || 0) >= 0
-                                            ? "bg-green-500/10 text-green-500"
-                                            : "bg-red-500/10 text-red-500"
-                                    )}>
-                                        {(data.change_24h || 0) >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                                        {(data.change_24h || 0).toFixed(2)}%
-                                    </div>
-                                </div>
-                                <CardDescription className="text-2xl font-mono text-foreground font-semibold">
-                                    ${data.current_price.toLocaleString(undefined, { maximumFractionDigits: data.current_price > 10 ? 0 : 2 })}
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="space-y-3 text-sm">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-muted-foreground text-xs uppercase tracking-wider">Volume (24h)</span>
-                                        <div className="text-right">
-                                            <div className="font-mono">${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}</div>
-                                            <div className={cn("text-[10px] font-bold", getLevel(data.volume_24h || 0, 'volume').color)}>
-                                                {getLevel(data.volume_24h || 0, 'volume').label}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-muted-foreground text-xs uppercase tracking-wider">Open Interest</span>
-                                        <div className="text-right">
-                                            <div className="font-mono">${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}</div>
-                                            <div className={cn("text-[10px] font-bold", getLevel(data.open_interest || 0, 'oi').color)}>
-                                                {getLevel(data.open_interest || 0, 'oi').label}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-muted-foreground text-xs uppercase tracking-wider">Funding Rate</span>
-                                        <div className="font-mono">{(data.funding_rate || 0).toFixed(6)}%</div>
-                                    </div>
-                                </div>
-
-                                <div className="pt-2 border-t border-border/50">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-2">
-                                            <Radio className="w-4 h-4 text-blue-500" />
-                                            <span className="text-sm font-medium">RSI (14)</span>
-                                        </div>
-                                        <span className={cn(
-                                            "font-mono text-sm font-medium",
-                                            (data.intraday?.rsi14 || 50) > 70 ? "text-red-500" : (data.intraday?.rsi14 || 50) < 30 ? "text-green-500" : "text-muted-foreground"
-                                        )}>
-                                            {data.intraday?.rsi14?.toFixed(1) || "N/A"}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center justify-between mt-2">
-                                        <span className="text-sm font-medium text-muted-foreground pl-6">EMA (20)</span>
-                                        <span className="font-mono text-sm text-foreground">
-                                            ${data.intraday?.ema20?.toLocaleString(undefined, { maximumFractionDigits: (data.intraday?.ema20 || 0) > 10 ? 0 : 2 }) || "N/A"}
-                                        </span>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+            {/* Detailed Table */}
+            <Card className="border shadow-sm">
+                <div className="p-4 border-b bg-muted/40 font-semibold flex items-center">
+                    Market Overview
                 </div>
-            )}
+                <CardContent className="p-0">
+                    {assets.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground space-y-3">
+                            <Activity className="h-10 w-10 opacity-50" />
+                            <p>No market data available.</p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm text-left">
+                                <thead className="bg-[#1a1a1a] text-gray-400 uppercase text-xs">
+                                    <tr>
+                                        <th className="px-4 py-3 font-medium">Asset</th>
+                                        <th className="px-4 py-3 font-medium text-right">Price</th>
+                                        <th className="px-4 py-3 font-medium text-right">24h Change</th>
+                                        <th className="px-4 py-3 font-medium text-right">Volume</th>
+                                        <th className="px-4 py-3 font-medium text-right">Open Interest</th>
+                                        <th className="px-4 py-3 font-medium text-right">Funding Rate</th>
+                                        <th className="px-4 py-3 font-medium text-right">RSI (14)</th>
+                                        <th className="px-4 py-3 font-medium text-right">EMA (20)</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/50 bg-[#0a0a0a]">
+                                    {assets.map((data) => (
+                                        <tr key={data.asset} className="hover:bg-muted/10 transition-colors">
+                                            <td className="px-4 py-3 font-bold text-white">{data.asset}</td>
+                                            <td className="px-4 py-3 text-right font-mono text-gray-300">
+                                                ${data.current_price.toLocaleString(undefined, { maximumFractionDigits: data.current_price > 10 ? 0 : 2 })}
+                                            </td>
+                                            <td className="px-4 py-3 text-right">
+                                                <div className={cn(
+                                                    "inline-flex items-center justify-end font-mono font-medium",
+                                                    (data.change_24h || 0) >= 0 ? "text-green-500" : "text-red-500"
+                                                )}>
+                                                    {(data.change_24h || 0) >= 0 ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                                                    {Math.abs(data.change_24h || 0).toFixed(2)}%
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-mono text-gray-400">
+                                                ${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-mono text-gray-400">
+                                                ${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-mono text-yellow-500/80">
+                                                {(data.funding_rate || 0).toFixed(6)}%
+                                            </td>
+                                            <td className={cn("px-4 py-3 text-right font-mono font-bold", getRsiColor(data.intraday?.rsi14 || 50))}>
+                                                {data.intraday?.rsi14?.toFixed(1) || "-"}
+                                            </td>
+                                            <td className="px-4 py-3 text-right font-mono text-blue-400">
+                                                ${data.intraday?.ema20?.toLocaleString(undefined, { maximumFractionDigits: (data.intraday?.ema20 || 0) > 10 ? 0 : 2 }) || "-"}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }
