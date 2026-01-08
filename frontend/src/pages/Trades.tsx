@@ -89,10 +89,12 @@ export function TradesPage() {
                                                     {trade.action}
                                                 </span>
                                             </td>
-                                            <td className="px-4 py-3 text-right font-mono text-gray-300">{Number(trade.amount).toFixed(4)}</td>
-                                            <td className="px-4 py-3 text-right font-mono text-gray-300">${trade.price.toLocaleString(undefined, { maximumFractionDigits: trade.price > 10 ? 0 : 2 })}</td>
+                                            <td className="px-4 py-3 text-right font-mono text-gray-300">{Number(trade.amount || 0).toFixed(4)}</td>
+                                            <td className="px-4 py-3 text-right font-mono text-gray-300">
+                                                ${Number(trade.price || 0).toLocaleString(undefined, { maximumFractionDigits: (trade.price || 0) > 10 ? 0 : 2 })}
+                                            </td>
                                             <td className="px-4 py-3 text-right font-mono text-gray-400">
-                                                ${(trade.amount * trade.price).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                                                ${Number((trade.amount || 0) * (trade.price || 0)).toLocaleString(undefined, { maximumFractionDigits: 2 })}
                                             </td>
                                         </tr>
                                     ))}
