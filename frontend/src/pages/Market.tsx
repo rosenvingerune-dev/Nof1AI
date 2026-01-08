@@ -1,7 +1,7 @@
 import { useBotStore } from "@/stores/useBotStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { TrendingUp, TrendingDown, Activity, DollarSign, BarChart3, PieChart } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity, BarChart3, PieChart } from "lucide-react";
 import { InfoCard } from "@/components/InfoCard";
 
 export function MarketPage() {
@@ -18,6 +18,18 @@ export function MarketPage() {
     const bullishCount = assets.filter(a => (a.change_24h || 0) > 0).length;
     const isBullish = bullishCount > assets.length / 2;
     const totalVolume = assets.reduce((acc, a) => acc + (a.volume_24h || 0), 0);
+
+    // Helper for simple formatting
+    const getLevel = (value: number, type: 'volume' | 'oi') => {
+        if (!value) return { label: 'LOW', color: 'text-muted-foreground' };
+
+        const thresholdHigh = type === 'volume' ? 500_000_000 : 100_000_000;
+        const thresholdMed = type === 'volume' ? 50_000_000 : 10_000_000;
+
+        if (value > thresholdHigh) return { label: 'HIGH', color: 'text-green-500' };
+        if (value > thresholdMed) return { label: 'MODERATE', color: 'text-yellow-500' };
+        return { label: 'LOW', color: 'text-muted-foreground' };
+    };
 
     const getRsiColor = (rsi: number) => {
         if (rsi > 70) return "text-red-500";
@@ -100,10 +112,16 @@ export function MarketPage() {
                                                 </div>
                                             </td>
                                             <td className="px-4 py-3 text-right font-mono text-gray-400">
-                                                ${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}
+                                                <div>${(data.volume_24h || 0).toLocaleString(undefined, { notation: "compact" })}</div>
+                                                <div className={cn("text-[10px] font-bold uppercase", getLevel(data.volume_24h || 0, 'volume').color)}>
+                                                    {getLevel(data.volume_24h || 0, 'volume').label}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3 text-right font-mono text-gray-400">
-                                                ${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}
+                                                <div>${(data.open_interest || 0).toLocaleString(undefined, { notation: "compact" })}</div>
+                                                <div className={cn("text-[10px] font-bold uppercase", getLevel(data.open_interest || 0, 'oi').color)}>
+                                                    {getLevel(data.open_interest || 0, 'oi').label}
+                                                </div>
                                             </td>
                                             <td className="px-4 py-3 text-right font-mono text-yellow-500/80">
                                                 {(data.funding_rate || 0).toFixed(6)}%
