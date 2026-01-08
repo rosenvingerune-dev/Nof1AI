@@ -5,6 +5,7 @@ Verifiserer at Hyperliquid exchange API fungerer korrekt.
 
 import sys
 import asyncio
+import pytest
 from pathlib import Path
 
 # Add project root to path
@@ -30,6 +31,7 @@ def test_hyperliquid_import():
         return False
 
 
+@pytest.mark.asyncio
 async def test_api_initialization():
     """Test Hyperliquid API initialisering."""
     print("\n--- Testing API Initialization ---")
@@ -64,6 +66,7 @@ async def test_api_initialization():
         return False
 
 
+@pytest.mark.asyncio
 async def test_get_user_state():
     """Test henting av account state."""
     print("\n--- Testing Get User State ---")
@@ -116,6 +119,7 @@ async def test_get_user_state():
         return False
 
 
+@pytest.mark.asyncio
 async def test_get_current_price():
     """Test henting av sanntidspriser."""
     print("\n--- Testing Get Current Price ---")
@@ -144,6 +148,7 @@ async def test_get_current_price():
         return False
 
 
+@pytest.mark.asyncio
 async def test_get_funding_rate():
     """Test henting av funding rates."""
     print("\n--- Testing Get Funding Rate ---")
@@ -179,6 +184,7 @@ async def test_get_funding_rate():
         return False
 
 
+@pytest.mark.asyncio
 async def test_get_open_interest():
     """Test henting av open interest."""
     print("\n--- Testing Get Open Interest ---")
@@ -207,6 +213,7 @@ async def test_get_open_interest():
         return False
 
 
+@pytest.mark.asyncio
 async def test_get_open_orders():
     """Test henting av open orders."""
     print("\n--- Testing Get Open Orders ---")

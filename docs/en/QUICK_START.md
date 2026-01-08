@@ -1,95 +1,95 @@
-# ⚡ Quick Start Guide - nof1.ai med Gemini
+# ⚡ Quick Start Guide - nof1.ai with Gemini
 
-3-minutters guide for å komme i gang med Gemini-drevet trading bot.
-
----
-
-## 🎯 To alternativer for å starte
-
-### 🟢 Alternativ A: Paper Trading (ANBEFALT - 100% gratis)
-**Fordeler:**
-- ✅ Ingen exchange account nødvendig
-- ✅ Ingen wallet setup
-- ✅ Ingen testnet tokens
-- ✅ Start på 3 minutter
-- ✅ 100% risikofritt (kun Gemini API nøkkel)
-
-**Hva du trenger:**
-- Gemini API key (gratis)
-- Kun 3 minutter setup
-
-**[Gå til Paper Trading Setup →](#paper-trading-setup)**
+3-minute guide to get started with Gemini-driven trading bot.
 
 ---
 
-### 🟡 Alternativ B: Hyperliquid Testnet (Krever wallet)
-**Fordeler:**
-- ✅ Ekte exchange API
-- ✅ Testnet (fake penger)
-- ✅ Klar for mainnet senere
+## 🎯 Two options to start
 
-**Hva du trenger:**
-- Gemini API key (gratis)
-- Hyperliquid wallet med mainnet aktivitet
-- 15-30 minutter setup
+### 🟢 Option A: Paper Trading (RECOMMENDED - 100% free)
+**Advantages:**
+- ✅ No exchange account needed
+- ✅ No wallet setup
+- ✅ No testnet tokens
+- ✅ Start in 3 minutes
+- ✅ 100% risk-free (only Gemini API key)
 
-**[Gå til Hyperliquid Testnet Setup →](#hyperliquid-testnet-setup)**
+**What you need:**
+- Gemini API key (free)
+- Only 3 minutes setup
+
+**[Go to Paper Trading Setup →](#paper-trading-setup)**
 
 ---
 
-## 🎯 Hva du får (begge alternativer)
+### 🟡 Option B: Hyperliquid Testnet (Requires wallet)
+**Advantages:**
+- ✅ Real exchange API
+- ✅ Testnet (fake money)
+- ✅ Ready for mainnet later
 
-- ✅ AI-drevet trading bot (Gemini 2.0 Flash)
-- ✅ Real-time markedsdata
+**What you need:**
+- Gemini API key (free)
+- Hyperliquid wallet with mainnet activity
+- 15-30 minutes setup
+
+**[Go to Hyperliquid Testnet Setup →](#hyperliquid-testnet-setup)**
+
+---
+
+## 🎯 What you get (both options)
+
+- ✅ AI-driven trading bot (Gemini 2.0 Flash)
+- ✅ Real-time market data
 - ✅ Desktop GUI for monitoring
-- ✅ Manual approval mode (du godkjenner trades)
-- ✅ Full position tracking og PnL
+- ✅ Manual approval mode (you approve trades)
+- ✅ Full position tracking and PnL
 
 ---
 
 # Paper Trading Setup
 
-## 📋 Du trenger (2 minutter)
+## 📋 You need (2 minutes)
 
-### 1. Gemini API Key (Gratis)
-- Gå til: https://makersuite.google.com/app/apikey
-- Klikk "Create API Key"
-- Kopier nøkkelen (starter med `AIzaSy...`)
+### 1. Gemini API Key (Free)
+- Go to: https://makersuite.google.com/app/apikey
+- Click "Create API Key"
+- Copy the key (starts with `AIzaSy...`)
 
 ---
 
-## 🚀 Setup (3 steg)
+## 🚀 Setup (3 steps)
 
-### Steg 1: Installer dependencies
+### Step 1: Install dependencies
 
 ```bash
 cd C:\Users\Rune\PycharmProjects\Nof1\nof1.ai-alpha-arena-nof1.ai-alpha-arena
 pip install -r requirements.txt
 ```
 
-### Steg 2: Lag .env fil
+### Step 2: Create .env file
 
 ```bash
-# Kopier template
+# Copy template
 copy .env.example .env
 
-# Åpne i editor
+# Open in editor
 notepad .env
 ```
 
-**Fyll inn (minimal konfig for PAPER TRADING):**
+**Fill in (minimal config for PAPER TRADING):**
 ```env
-# Trading Backend (VIKTIG!)
+# Trading Backend (IMPORTANT!)
 TRADING_BACKEND=paper
 
-# Paper Trading (ingen exchange nødvendig!)
+# Paper Trading (no exchange needed!)
 PAPER_TRADING_STARTING_BALANCE=10000.0
 
 # LLM Provider
 LLM_PROVIDER=gemini
 
 # Gemini API
-GEMINI_API_KEY=AIzaSy...  # <-- Din Gemini key her
+GEMINI_API_KEY=AIzaSy...  # <-- Your Gemini key here
 GEMINI_MODEL=gemini-2.0-flash-exp
 
 # Trading
@@ -98,14 +98,14 @@ INTERVAL=5m
 TRADING_MODE=manual
 ```
 
-### Steg 3: Test setup
+### Step 3: Test setup
 
 ```bash
 # Test paper trading
 python tests/test_05_paper_trading.py
 ```
 
-**Forventet:**
+**Expected:**
 ```
 ✅ ALL PAPER TRADING TESTS PASSED!
    • Paper trading API initialized
@@ -121,91 +121,91 @@ python tests/test_05_paper_trading.py
 python main.py
 ```
 
-**GUI åpner på:** http://localhost:3000
+**GUI opens at:** http://localhost:3000
 
-**Du ser nå:**
-- Dashboard med $10,000 simulated balance
-- Real-time BTC/ETH prices fra Binance
-- AI-genererte trading signals fra Gemini
+**You can now see:**
+- Dashboard with $10,000 simulated balance
+- Real-time BTC/ETH prices from Binance
+- AI-generated trading signals from Gemini
 
-**📚 Les mer:** `PAPER_TRADING_GUIDE.md` for fullstendig guide
+**📚 Read more:** `PAPER_TRADING_GUIDE.md` for full guide
 
 ---
 
 # Hyperliquid Testnet Setup
 
-**⚠️ MÅ ha wallet med mainnet aktivitet** - se `HYPERLIQUID_TESTNET_WORKAROUND.md`
+**⚠️ MUST have wallet with mainnet activity** - see `HYPERLIQUID_TESTNET_WORKAROUND.md`
 
-## 📋 Du trenger
+## 📋 You need
 
-### 1. Gemini API Key (Gratis)
-- Gå til: https://makersuite.google.com/app/apikey
-- Klikk "Create API Key"
-- Kopier nøkkelen (starter med `AIzaSy...`)
+### 1. Gemini API Key (Free)
+- Go to: https://makersuite.google.com/app/apikey
+- Click "Create API Key"
+- Copy the key (starts with `AIzaSy...`)
 
 ### 2. Hyperliquid Wallet
-**OBS:** Du trenger en wallet som har vært aktiv på Hyperliquid mainnet!
+**NOTE:** You need a wallet that has been active on Hyperliquid mainnet!
 
-**Alternativ 1: Bruk eksisterende MetaMask wallet**
-- Hvis du har brukt Hyperliquid før
-- Hent private key fra MetaMask
-- Se `HYPERLIQUID_TESTNET_WORKAROUND.md`
+**Option 1: Use existing MetaMask wallet**
+- If you have used Hyperliquid before
+- Get private key from MetaMask
+- See `HYPERLIQUID_TESTNET_WORKAROUND.md`
 
-**Alternativ 2: Generer ny wallet og aktiver den**
+**Option 2: Generate new wallet and activate it**
 ```bash
 python scripts/setup_hyperliquid_testnet.py
 ```
-- Koster $5-10 å aktivere på mainnet
-- Se `HYPERLIQUID_TESTNET_WORKAROUND.md`
+- Costs $5-10 to activate on mainnet
+- See `HYPERLIQUID_TESTNET_WORKAROUND.md`
 
-**Alternativ 3: Bruk paper trading istedet**
-- 100% gratis
-- Ingen wallet nødvendig
-- Se [Paper Trading Setup](#paper-trading-setup)
+**Option 3: Use paper trading instead**
+- 100% free
+- No wallet needed
+- See [Paper Trading Setup](#paper-trading-setup)
 
 ---
 
-## 🚀 Setup (4 steg)
+## 🚀 Setup (4 steps)
 
-### Steg 1: Installer dependencies
+### Step 1: Install dependencies
 
 ```bash
 cd C:\Users\Rune\PycharmProjects\Nof1\nof1.ai-alpha-arena-nof1.ai-alpha-arena
 pip install -r requirements.txt
 ```
 
-### Steg 2: Sjekk wallet aktivering
+### Step 2: Check wallet activation
 
 ```bash
 python scripts/check_wallet_activation.py
 ```
 
-Hvis **IKKE aktivert**, se `HYPERLIQUID_TESTNET_WORKAROUND.md` for løsninger.
+If **NOT activated**, see `HYPERLIQUID_TESTNET_WORKAROUND.md` for solutions.
 
-### Steg 3: Lag .env fil
+### Step 3: Create .env file
 
 ```bash
-# Kopier template
+# Copy template
 copy .env.example .env
 
-# Åpne i editor
+# Open in editor
 notepad .env
 ```
 
-**Fyll inn (minimal konfig for HYPERLIQUID TESTNET):**
+**Fill in (minimal config for HYPERLIQUID TESTNET):**
 ```env
 # Trading Backend
 TRADING_BACKEND=hyperliquid
 
 # Hyperliquid Testnet
 HYPERLIQUID_NETWORK=testnet
-HYPERLIQUID_PRIVATE_KEY=0x...  # <-- Din private key
+HYPERLIQUID_PRIVATE_KEY=0x...  # <-- Your private key
 
 # LLM Provider
 LLM_PROVIDER=gemini
 
 # Gemini API
-GEMINI_API_KEY=AIzaSy...  # <-- Din Gemini key her
+GEMINI_API_KEY=AIzaSy...  # <-- Your Gemini key here
 GEMINI_MODEL=gemini-2.0-flash-exp
 
 # Trading
@@ -214,13 +214,13 @@ INTERVAL=5m
 TRADING_MODE=manual
 ```
 
-### Steg 4: Test setup
+### Step 4: Test setup
 
 ```bash
 python tests/test_all.py
 ```
 
-**Forventet:**
+**Expected:**
 ```
 🎉 ALL TESTS PASSED!
 ```
@@ -233,11 +233,11 @@ python tests/test_all.py
 python main.py
 ```
 
-**GUI åpner på:** http://localhost:3000
+**GUI opens at:** http://localhost:3000
 
 ---
 
-## 📱 Bruk GUI
+## 📱 Use GUI
 
 ### Dashboard
 - Account balance
@@ -263,85 +263,85 @@ python main.py
 
 ---
 
-## 🎓 Første Trading Sesjon
+## 🎓 First Trading Session
 
 ### 1. Start bot (manual mode)
 ```bash
 python main.py
 ```
 
-### 2. Vent på første analyse
-- Bot kjører hvert 5. minutt (INTERVAL=5m)
-- Henter markedsdata
-- Sender til Gemini for analyse
+### 2. Wait for first analysis
+- Bot runs every 5th minute (INTERVAL=5m)
+- Fetches market data
+- Sends to Gemini for analysis
 
-### 3. Se Gemini's reasoning
-- Gå til "Reasoning" page i GUI
-- Les full analyse av markedet
-- Forstå hvorfor AI foreslår trade
+### 3. See Gemini's reasoning
+- Go to "Reasoning" page in GUI
+- Read full market analysis
+- Understand why AI suggests trade
 
 ### 4. Review trade proposal
-- Gå til "Recommendations" page
-- Se foreslått trade (BUY/SELL/HOLD)
-- Sjekk TP/SL priser
-- Les rationale
+- Go to "Recommendations" page
+- See proposed trade (BUY/SELL/HOLD)
+- Check TP/SL prices
+- Read rationale
 
-### 5. Approve eller reject
-- Klikk "Approve" hvis du er enig
-- Klikk "Reject" hvis ikke
-- Trade eksekverteres kun hvis godkjent
+### 5. Approve or reject
+- Click "Approve" if you agree
+- Click "Reject" if not
+- Trade executes only if approved
 
 ### 6. Monitor position
-- Gå til "Positions" page
-- Se PnL i real-time
-- TP/SL triggers automatisk
+- Go to "Positions" page
+- See PnL in real-time
+- TP/SL triggers automatically
 
 ---
 
-## 💡 Tips for Første Uke
+## 💡 Tips for First Week
 
-### Testing strategi:
+### Testing strategy:
 
-**Dag 1-3: Observer**
-- La boten kjøre uten å godkjenne trades
-- Studer Gemini's reasoning
-- Forstå hvordan AI tenker
+**Day 1-3: Observe**
+- Let the bot run without approving trades
+- Study Gemini's reasoning
+- Understand how AI thinks
 
-**Dag 4-7: Selective trading**
-- Godkjenn kun trades du er 100% enig i
-- Start med små posisjoner ($100-500)
-- Dokumenter resultater
+**Day 4-7: Selective trading**
+- Approve only trades you 100% agree with
+- Start with small positions ($100-500)
+- Document results
 
-**Uke 2: Mer aktiv**
-- Øk posisjonsstørrelse til $500-1000
-- Test flere assets (SOL, AVAX, etc.)
-- Eksperimenter med leverage (3x maks)
+**Week 2: More active**
+- Increase position size to $500-1000
+- Test more assets (SOL, AVAX, etc.)
+- Experiment with leverage (3x max)
 
 ---
 
-## ⚙️ Justere Innstillinger
+## ⚙️ Adjust Settings
 
-### Bytt assets:
+### Change assets:
 
 **.env:**
 ```env
 ASSETS=BTC,ETH,SOL
 ```
 
-### Bytt intervall:
+### Change interval:
 
 ```env
-INTERVAL=15m  # Mindre frekvente trades
-# eller
-INTERVAL=1h   # Kun 24 beslutninger/dag
+INTERVAL=15m  # Less frequent trades
+# or
+INTERVAL=1h   # Only 24 decisions/day
 ```
 
-### Bytt til auto mode (når komfortabel):
+### Change to auto mode (when comfortable):
 
 ```env
 TRADING_MODE=auto
 ```
-⚠️ **ADVARSEL:** Auto mode eksekverterer trades uten godkjenning!
+⚠️ **WARNING:** Auto mode executes trades without approval!
 
 ---
 
@@ -349,10 +349,10 @@ TRADING_MODE=auto
 
 ### "GEMINI_API_KEY not found"
 ```bash
-# Sjekk at .env eksisterer
+# Check that .env exists
 dir .env
 
-# Verifiser innhold
+# Verify content
 type .env
 
 # Restart terminal
@@ -360,18 +360,18 @@ type .env
 
 ### "No testnet funds"
 ```bash
-# Sjekk balance
+# Check balance
 python scripts/check_testnet_balance.py
 
-# Hvis $0, gå til Discord:
+# If $0, go to Discord:
 # 1. https://discord.gg/hyperliquid
-# 2. #testnet-faucet kanal
+# 2. #testnet-faucet channel
 # 3. !faucet YOUR_ADDRESS
 ```
 
 ### "Tests failing"
 ```bash
-# Kjør individuelt for å isolere problem
+# Run individually to isolate problem
 python tests/test_01_environment.py
 python tests/test_02_gemini_api.py
 python tests/test_03_hyperliquid_api.py
@@ -380,66 +380,66 @@ python tests/test_04_gemini_trading_agent.py
 
 ---
 
-## 📚 Dokumentasjon
+## 📚 Documentation
 
-### Kom i gang:
-1. **QUICK_START.md** (dette dokumentet) ← Start her
+### Get started:
+1. **QUICK_START.md** (this document) ← Start here
 2. **TESTING_QUICK_START.md** - Test guide
-3. **HYPERLIQUID_TESTNET_GUIDE.md** - Testnet detaljer
+3. **HYPERLIQUID_TESTNET_GUIDE.md** - Testnet details
 
-### Dypere læring:
+### Deeper learning:
 4. **GEMINI_SETUP.md** - Full Gemini guide
-5. **nof1AI_review.md** - Prosjekt analyse
-6. **IMPLEMENTATION_SUMMARY.md** - Teknisk oversikt
+5. **REVIEW_AND_ANALYSIS.md** - Project analysis
+6. **IMPLEMENTATION_SUMMARY.md** - Technical overview
 
 ---
 
-## ⚠️ Viktige Advarsler
+## ⚠️ Important Warnings
 
-### Før du starter:
+### Before you start:
 
-- [ ] ✅ Du bruker TESTNET (ikke mainnet)
-- [ ] ✅ TRADING_MODE=manual (ikke auto)
-- [ ] ✅ Du har lest README-filene
-- [ ] ✅ Du forstår at dette er læring/eksperimentering
-- [ ] ✅ Du vet hvordan man stopper boten (Ctrl+C)
+- [ ] ✅ You are using TESTNET (not mainnet)
+- [ ] ✅ TRADING_MODE=manual (not auto)
+- [ ] ✅ You have read the README files
+- [ ] ✅ You understand this is for learning/experimentation
+- [ ] ✅ You know how to stop the bot (Ctrl+C)
 
-### Aldri gjør dette:
+### Never do this:
 
-- ❌ Bruk testnet wallet på mainnet
-- ❌ Commit .env til git
-- ❌ Del private keys
-- ❌ Start med auto mode
-- ❌ Bruk ekte penger før grundig testing
+- ❌ Use testnet wallet on mainnet
+- ❌ Commit .env to git
+- ❌ Share private keys
+- ❌ Start with auto mode
+- ❌ Use real money before thorough testing
 
 ---
 
 ## 🎯 Success Metrics
 
-### Etter første uke, du bør ha:
+### After first week, you should have:
 
-- ✅ Kjørt 50+ trading cycles
-- ✅ Forstått Gemini's reasoning pattern
-- ✅ Godkjent og observert 5-10 trades
-- ✅ Dokumentert win rate
-- ✅ Identifisert forbedringspunkter
+- ✅ Run 50+ trading cycles
+- ✅ Understood Gemini's reasoning pattern
+- ✅ Approved and observed 5-10 trades
+- ✅ Documented win rate
+- ✅ Identified areas for improvement
 
-### Når klar for mainnet (om 2-4 uker):
+### When ready for mainnet (in 2-4 weeks):
 
-- ✅ Konsistent profitt på testnet (>55% win rate)
-- ✅ Forstår alle bot funksjoner
-- ✅ Har testet error scenarios
-- ✅ Komfortabel med risk management
-- ✅ Starter med minimal kapital ($100-500)
+- ✅ Consistent profit on testnet (>55% win rate)
+- ✅ Understand all bot functions
+- ✅ Have tested error scenarios
+- ✅ Comfortable with risk management
+- ✅ Start with minimal capital ($100-500)
 
 ---
 
-## 🆘 Hjelp
+## 🆘 Help
 
-### Ressurser:
+### Resources:
 
-1. **Dokumentasjon i prosjektet** (alle .md filer)
-2. **Log filer:**
+1. **Documentation in project** (all .md files)
+2. **Log files:**
    - `bot.log` - Bot activity
    - `llm_requests.log` - Gemini API calls
    - `data/diary.jsonl` - Trade history
@@ -450,32 +450,32 @@ python tests/test_04_gemini_trading_agent.py
 
 ---
 
-## 🎉 Du er klar!
+## 🎉 You are ready!
 
 ```bash
-# Kjør disse kommandoene i rekkefølge:
+# Run these commands in order:
 
 # 1. Setup testnet wallet
 python scripts/setup_hyperliquid_testnet.py
 
-# 2. Få tokens fra Discord (følg instruksjoner)
+# 2. Get tokens from Discord (follow instructions)
 
 # 3. Check balance
 python scripts/check_testnet_balance.py
 
-# 4. Kjør tester
+# 4. Run tests
 python tests/test_all.py
 
 # 5. Start bot
 python main.py
 
-# 6. Åpne browser: http://localhost:3000
+# 6. Open browser: http://localhost:3000
 
-# 7. Observer, lær, og ha det gøy! 🚀
+# 7. Observe, learn, and have fun! 🚀
 ```
 
 ---
 
-**Lykke til med AI-trading! 🤖💰**
+**Good luck with AI trading! 🤖💰**
 
-*Husk: Testnet er for læring. Ta deg tid, eksperimenter, og bli komfortabel før du vurderer mainnet.*
+*Remember: Testnet is for learning. Take your time, experiment, and get comfortable before considering mainnet.*

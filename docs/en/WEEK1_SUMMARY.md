@@ -1,4 +1,4 @@
-# 🎉 UKE 1 FULLFØRT - EVENT-DRIVEN ARCHITECTURE
+# 🎉 WEEK 1 COMPLETED - EVENT-DRIVEN ARCHITECTURE
 
 ## 📊 Executive Summary
 
@@ -9,98 +9,98 @@
 
 ---
 
-## ✅ Implementerte Forbedringer
+## ✅ Implemented Improvements
 
 ### 1. EventBus System (Day 1-2)
 
-**Fil:** `src/gui/services/event_bus.py` (265 linjer)
+**File:** `src/gui/services/event_bus.py` (265 lines)
 
-**Funksjoner:**
-- Central event bus for real-time kommunikasjon
-- Støtter både sync og async callbacks
-- Event history tracking (100 siste events)
-- Statistikk og debugging
+**Features:**
+- Central event bus for real-time communication
+- Supports both sync and async callbacks
+- Event history tracking (last 100 events)
+- Statistics and debugging
 - Singleton pattern
 
-**Event typer:**
-- `STATE_UPDATE` - Bot state endret
-- `TRADE_EXECUTED` - Trade utført
-- `POSITION_OPENED` - Ny posisjon åpnet
-- `POSITION_CLOSED` - Posisjon lukket
+**Event types:**
+- `STATE_UPDATE` - Bot state changed
+- `TRADE_EXECUTED` - Trade executed
+- `POSITION_OPENED` - New position opened
+- `POSITION_CLOSED` - Position closed
 - `BOT_STARTED` / `BOT_STOPPED` - Bot status
-- `MARKET_DATA_UPDATE` - Market data oppdatert
-- `ERROR_OCCURRED` - Feil oppstått
+- `MARKET_DATA_UPDATE` - Market data updated
+- `ERROR_OCCURRED` - Error occurred
 
-**Ytelsesgevinst:**
-- Eliminerer polling - kun updates ved faktiske endringer
-- 90% reduksjon i WebSocket trafikk
+**Performance gain:**
+- Eliminates polling - updates only on actual changes
+- 90% reduction in WebSocket traffic
 - Instant updates (<100ms)
 
 ---
 
 ### 2. StateManager Integration (Day 2)
 
-**Fil:** `src/gui/services/state_manager.py` (oppdatert)
+**File:** `src/gui/services/state_manager.py` (updated)
 
-**Endringer:**
-- Integrert med EventBus
-- Emitter granulære events (position_opened, bot_started, etc.)
-- Bakoverkompatibel med legacy observer pattern
-- Automatisk event broadcast ved state changes
+**Changes:**
+- Integrated with EventBus
+- Emits granular events (position_opened, bot_started, etc.)
+- Backward compatible with legacy observer pattern
+- Automatic event broadcast upon state changes
 
-**Før:**
+**Before:**
 ```python
 state_manager.update(new_state)
-# UI må polle for å se endringer
+# UI must poll to see changes
 ```
 
-**Etter:**
+**After:**
 ```python
 state_manager.update(new_state)
-# ↓ Automatisk broadcast via EventBus
-# ↓ UI oppdateres instantly!
+# ↓ Automatic broadcast via EventBus
+# ↓ UI updates instantly!
 ```
 
 ---
 
 ### 3. Dashboard - Reactive Version (Day 3)
 
-**Fil:** `src/gui/pages/dashboard_reactive.py` (438 linjer)
+**File:** `src/gui/pages/dashboard_reactive.py` (438 lines)
 
-**Før (dashboard.py):**
+**Before (dashboard.py):**
 ```python
-ui.timer(10.0, update_dashboard)  # Poll hver 10. sekund
+ui.timer(10.0, update_dashboard)  # Poll every 10 seconds
 ```
 
-**Etter (dashboard_reactive.py):**
+**After (dashboard_reactive.py):**
 ```python
 event_bus.subscribe(EventTypes.STATE_UPDATE, on_state_update)
-# Instant updates, ingen polling!
+# Instant updates, no polling!
 ```
 
-**Forbedringer:**
-- ❌ FJERNET `ui.timer(10.0)` - ingen polling!
+**Improvements:**
+- ❌ REMOVED `ui.timer(10.0)` - no polling!
 - ✅ Event-driven updates
-- ✅ Selektive oppdateringer (kun endrede komponenter)
-- ✅ 92% CPU-reduksjon for denne siden
+- ✅ Selective updates (only changed components)
+- ✅ 92% CPU reduction for this page
 
-**Spesifikke optimaliserin ger:**
-- Separate update-funksjoner for metrics, charts, market data
-- Kun oppdater det som faktisk endret seg
-- Loading states for bedre UX
+**Specific optimizations:**
+- Separate update functions for metrics, charts, market data
+- Only update what actually changed
+- Loading states for better UX
 
 ---
 
 ### 4. Positions - Reactive Version (Day 4)
 
-**Fil:** `src/gui/pages/positions_reactive.py` (367 linjer)
+**File:** `src/gui/pages/positions_reactive.py` (367 lines)
 
-**Før (positions.py):**
+**Before (positions.py):**
 ```python
-ui.timer(2.0, update_positions)  # Poll hver 2. sekund!
+ui.timer(2.0, update_positions)  # Poll every 2 seconds!
 ```
 
-**Etter (positions_reactive.py):**
+**After (positions_reactive.py):**
 ```python
 event_bus.subscribe(EventTypes.STATE_UPDATE, on_state_update)
 event_bus.subscribe(EventTypes.POSITION_OPENED, on_position_opened)
@@ -108,101 +108,101 @@ event_bus.subscribe(EventTypes.POSITION_CLOSED, on_position_closed)
 # Real-time updates!
 ```
 
-**Forbedringer:**
-- ❌ FJERNET `ui.timer(2.0)` - ingen polling!
-- ✅ Lytter til spesifikke position events
+**Improvements:**
+- ❌ REMOVED `ui.timer(2.0)` - no polling!
+- ✅ Listens to specific position events
 - ✅ Instant PnL updates
-- ✅ 93% CPU-reduksjon
+- ✅ 93% CPU reduction
 
 ---
 
 ### 5. History - Lazy Loading Version (Day 5)
 
-**Fil:** `src/gui/pages/history_optimized.py` (462 linjer)
+**File:** `src/gui/pages/history_optimized.py` (462 lines)
 
-**Problem før:**
+**Problem before:**
 ```python
-trades = bot_service.get_trade_history(limit=10000)  # Last ALLE 10,000!
+trades = bot_service.get_trade_history(limit=10000)  # Load ALL 10,000!
 table.rows = trades  # Render 10,000 DOM nodes!
-# ↓ Browser freezer i 8+ sekunder
+# ↓ Browser freezes for 8+ seconds
 ```
 
-**Løsning:**
+**Solution:**
 ```python
 class TradeHistoryPaginator:
     def load_next_page(self):
-        # Last kun 50 trades om gangen
+        # Load only 50 trades at a time
         return bot_service.get_trade_history(
             limit=50,
             offset=self.current_offset
         )
 
-# "Load More" button for inkrementell lasting
+# "Load More" button for incremental loading
 ```
 
-**Forbedringer:**
-- ✅ Lazy loading - kun 50 trades lastes om gangen
-- ✅ "Load More" knapp
+**Improvements:**
+- ✅ Lazy loading - only 50 trades loaded at a time
+- ✅ "Load More" button
 - ✅ Cache for loaded pages
 - ✅ Offset-based pagination
-- ✅ 95% raskere initial load (8s → 0.4s for 10,000 trades)
+- ✅ 95% faster initial load (8s → 0.4s for 10,000 trades)
 - ✅ EventBus integration for new trades
 
-**Støtte i bot_service:**
+**Support in bot_service:**
 ```python
 def get_trade_history(
     asset=None,
     action=None,
     limit=100,
-    offset=0  # ← NY parameter!
+    offset=0  # ← NEW parameter!
 ):
-    # Paginering støtte
+    # Pagination support
 ```
 
 ---
 
-## 📈 Ytelsesresultater
+## 📈 Performance Results
 
 ### CPU Usage (Idle Bot)
 
-| Komponent | Før (Polling) | Etter (Reactive) | Forbedring |
-|-----------|---------------|------------------|------------|
-| Dashboard | 25% | 2% | **92% reduksjon** |
-| Positions | 15% | 1% | **93% reduksjon** |
-| History | 10% | 0.5% | **95% reduksjon** |
-| **Total** | **80%** | **15%** | **81% reduksjon** |
+| Component | Before (Polling) | After (Reactive) | Improvement |
+|-----------|------------------|------------------|-------------|
+| Dashboard | 25% | 2% | **92% reduction** |
+| Positions | 15% | 1% | **93% reduction** |
+| History | 10% | 0.5% | **95% reduction** |
+| **Total** | **80%** | **15%** | **81% reduction** |
 
 ### Update Latency
 
-| Event Type | Før | Etter | Forbedring |
+| Event Type | Before | After | Improvement |
 |------------|-----|-------|------------|
-| State Update | 2-10s | <50ms | **200x raskere** |
-| Trade Execution | 2-10s | <50ms | **200x raskere** |
-| Position Change | 2s | <50ms | **40x raskere** |
+| State Update | 2-10s | <50ms | **200x faster** |
+| Trade Execution | 2-10s | <50ms | **200x faster** |
+| Position Change | 2s | <50ms | **40x faster** |
 | New Trade in History | 5s | Instant | **Instant** |
 
 ### Initial Load Time (10,000 trades)
 
-| Metrikk | Før | Etter | Forbedring |
+| Metric | Before | After | Improvement |
 |---------|-----|-------|------------|
-| DOM Nodes Created | 10,000+ | 50 | **99.5% reduksjon** |
-| Load Time | 8 sekunder | 0.4s | **95% raskere** |
-| Memory | 800MB | 150MB | **81% reduksjon** |
+| DOM Nodes Created | 10,000+ | 50 | **99.5% reduction** |
+| Load Time | 8 seconds | 0.4s | **95% faster** |
+| Memory | 800MB | 150MB | **81% reduction** |
 
 ### Timers Eliminated
 
-| Side | Før | Etter |
+| Page | Before | After |
 |------|-----|-------|
-| Dashboard | `ui.timer(10.0)` | ✅ Ingen |
-| Positions | `ui.timer(2.0)` | ✅ Ingen |
-| History | `ui.timer(5.0)` | ✅ Ingen |
+| Dashboard | `ui.timer(10.0)` | ✅ None |
+| Positions | `ui.timer(2.0)` | ✅ None |
+| History | `ui.timer(5.0)` | ✅ None |
 | **Total** | **3 timers** | **0 timers** |
 
 ---
 
-## 📁 Nye Filer
+## 📁 New Files
 
-| Fil | Linjer | Beskrivelse |
+| File | Lines | Description |
 |-----|--------|-------------|
 | `src/gui/services/event_bus.py` | 265 | Event bus system |
 | `src/gui/pages/dashboard_reactive.py` | 438 | Reactive dashboard |
@@ -213,7 +213,7 @@ def get_trade_history(
 | `GUI_FRAMEWORK_ANALYSIS.md` | - | Framework analysis |
 | `WEEK1_SUMMARY.md` | - | This file |
 
-**Total nye linjer kode:** ~1,752 linjer
+**Total new lines of code:** ~1,752 lines
 
 ---
 
@@ -221,23 +221,23 @@ def get_trade_history(
 
 ### Unit Tests
 
-**Fil:** `tests/test_event_bus.py`
+**File:** `tests/test_event_bus.py`
 
-**Tests implementert:**
+**Tests implemented:**
 1. ✅ Singleton pattern
-2. ✅ Subscribe og publish (sync)
-3. ✅ Subscribe og publish (async)
+2. ✅ Subscribe and publish (sync)
+3. ✅ Subscribe and publish (async)
 4. ✅ Multiple subscribers
 5. ✅ Unsubscribe
 6. ✅ Event history
 7. ✅ Statistics
 8. ✅ Error handling (crashed callbacks)
-9. ✅ Async callbacks med delays
+9. ✅ Async callbacks with delays
 10. ✅ Clear history
 11. ✅ Event type constants
 12. ✅ High volume events (100+ events/s)
 
-**Kjør tester:**
+**Run tests:**
 ```bash
 pytest tests/test_event_bus.py -v
 ```
@@ -245,26 +245,26 @@ pytest tests/test_event_bus.py -v
 ### Manual Testing Checklist
 
 - [ ] Start app: `python main.py`
-- [ ] Åpne http://localhost:8081
-- [ ] Test Dashboard - metrics oppdateres instantly
+- [ ] Open http://localhost:8081
+- [ ] Test Dashboard - metrics update instantly
 - [ ] Test Positions - real-time PnL updates
-- [ ] Test History - "Load More" funksjonalitet
-- [ ] Sjekk CPU (Task Manager) - skal være <20%
-- [ ] Test EventBus stats (se debug logs)
+- [ ] Test History - "Load More" functionality
+- [ ] Check CPU (Task Manager) - should be <20%
+- [ ] Test EventBus stats (see debug logs)
 
 ---
 
-## 🔧 Hvordan Aktivere
+## 🔧 How to Activate
 
-### Option 1: Erstatt Imports (Anbefalt)
+### Option 1: Replace Imports (Recommended)
 
 ```python
-# I src/gui/app.py, linje 12:
+# In src/gui/app.py, line 12:
 
-# GAMMEL:
+# OLD:
 from src.gui.pages import dashboard, positions, history, ...
 
-# NY (bruk reactive versioner):
+# NEW (use reactive versions):
 from src.gui.pages import (
     dashboard_reactive as dashboard,
     positions_reactive as positions,
@@ -273,12 +273,12 @@ from src.gui.pages import (
 )
 ```
 
-### Option 2: Gradvis Migrering
+### Option 2: Gradual Migration
 
-Test én side om gangen:
+Test one page at a time:
 
 ```python
-# Test kun Dashboard:
+# Test only Dashboard:
 if page == 'Dashboard':
     import src.gui.pages.dashboard_reactive as dash
     dash.create_dashboard(bot_service, state_manager)
@@ -286,52 +286,52 @@ if page == 'Dashboard':
 
 ---
 
-## 🐛 Kjente Begrensninger
+## 🐛 Known Limitations
 
-### 1. NiceGUI er fortsatt en Web App
+### 1. NiceGUI is still a Web App
 
-EventBus løser polling-problemet, men:
-- ❌ Fortsatt WebSocket overhead (mindre nå)
-- ❌ Browser-based, ikke native desktop
-- ❌ Automatisk UI-testing fortsatt vanskelig
+EventBus solves the polling problem, but:
+- ❌ Still WebSocket overhead (less now)
+- ❌ Browser-based, not native desktop
+- ❌ Automatic UI testing still difficult
 
-**Se:** `GUI_FRAMEWORK_ANALYSIS.md` for alternativer (Qt, Streamlit)
+**See:** `GUI_FRAMEWORK_ANALYSIS.md` for alternatives (Qt, Streamlit)
 
-### 2. Lazy Loading Krever Mer Klikk
+### 2. Lazy Loading Requires More Clicks
 
-**Før:** Se alle 10,000 trades umiddelbart (men tregt)
-**Nå:** Må klikke "Load More" for å se flere
+**Before:** See all 10,000 trades immediately (but slow)
+**Now:** Must click "Load More" to see more
 
-**Trade-off:** Initial load 95% raskere, men krever user interaction.
+**Trade-off:** Initial load 95% faster, but requires user interaction.
 
 ### 3. Backwards Compatibility
 
-Gamle sider fungerer fortsatt:
+Old pages still work:
 - `dashboard.py` (polling version)
 - `positions.py` (polling version)
 - `history.py` (loads all trades)
 
-Men anbefalt å migrere til nye versioner.
+But recommended to migrate to new versions.
 
 ---
 
-## 📚 Dokumentasjon
+## 📚 Documentation
 
-### For Utviklere
+### For Developers
 
 1. **EventBus API:**
-   - Les `src/gui/services/event_bus.py` docstrings
-   - Se `tests/test_event_bus.py` for eksempler
+   - Read `src/gui/services/event_bus.py` docstrings
+   - See `tests/test_event_bus.py` for examples
 
 2. **Reactive Pages:**
-   - Studér `dashboard_reactive.py` for pattern
-   - Event subscription i `create_dashboard()` funksjon
+   - Study `dashboard_reactive.py` for pattern
+   - Event subscription in `create_dashboard()` function
 
 3. **Lazy Loading:**
-   - Se `history_optimized.py` for paginering
-   - `TradeHistoryPaginator` klasse
+   - See `history_optimized.py` for pagination
+   - `TradeHistoryPaginator` class
 
-### For Brukere
+### For Users
 
 1. **Migration Guide:** `REACTIVE_MIGRATION_GUIDE.md`
 2. **Performance Plan:** `PERFORMANCE_PLAN.md`
@@ -339,11 +339,11 @@ Men anbefalt å migrere til nye versioner.
 
 ---
 
-## 🚀 Neste Steg (Uke 2)
+## 🚀 Next Steps (Week 2)
 
 ### Caching Layer
 
-**Mål:** Redusere API calls med 40%
+**Goal:** Reduce API calls by 40%
 
 **Plan:**
 ```python
@@ -355,7 +355,7 @@ class CacheManager:
         # Store in cache
 ```
 
-**Bruk:**
+**Usage:**
 ```python
 @cache_manager.cached(ttl=5)
 async def get_user_state():
@@ -364,16 +364,16 @@ async def get_user_state():
 
 ### Log Optimization
 
-**Problem:** `logs.py` leser hele filen hver sekund
+**Problem:** `logs.py` reads the entire file every second
 
-**Løsning:** File watcher (watchdog)
+**Solution:** File watcher (watchdog)
 
 ```python
 from watchdog.observers import Observer
 
 class LogWatcher:
     def on_modified(self, event):
-        # Kun les nye linjer
+        # Only read new lines
         with open('bot.log') as f:
             f.seek(last_pos)
             new_lines = f.readlines()
@@ -381,9 +381,9 @@ class LogWatcher:
 
 ### Loading States & Skeleton Screens
 
-**Problem:** "No data" vises i stedet for "Loading..."
+**Problem:** "No data" is shown instead of "Loading..."
 
-**Løsning:**
+**Solution:**
 ```python
 def create_loading_skeleton():
     with ui.column():
@@ -399,51 +399,51 @@ def create_loading_skeleton():
 
 ### 1. Event-Driven > Polling
 
-**Før:**
-- 8 timers poller kontinuerlig
-- Hver timer sender WebSocket message
-- Browser overveldet
+**Before:**
+- 8 timers polling continuously
+- Each timer sends WebSocket message
+- Browser overwhelmed
 
-**Etter:**
+**After:**
 - 0 timers
-- Kun updates ved faktiske endringer
-- 90% reduksjon i trafikk
+- Only updates on actual changes
+- 90% reduction in traffic
 
-**Leksjon:** Event-driven arkitektur er ALLTID bedre for real-time apps.
+**Lesson:** Event-driven architecture is ALWAYS better for real-time apps.
 
 ---
 
-### 2. Lazy Loading er Essensielt
+### 2. Lazy Loading is Essential
 
 **Problem:**
 ```python
-# Last alle 10,000 trades:
+# Load all 10,000 trades:
 all_trades = get_trade_history(limit=10000)
-# ↓ 8 sekunder + 800MB memory
+# ↓ 8 seconds + 800MB memory
 ```
 
-**Løsning:**
+**Solution:**
 ```python
-# Last 50 om gangen:
+# Load 50 at a time:
 first_page = get_trade_history(limit=50, offset=0)
-# ↓ 0.4 sekunder + 150MB memory
+# ↓ 0.4 seconds + 150MB memory
 ```
 
-**Leksjon:** ALDRI last all data på én gang. Paginer alltid.
+**Lesson:** NEVER load all data at once. Always paginate.
 
 ---
 
-### 3. NiceGUI Har Begrensninger
+### 3. NiceGUI Has Limitations
 
-**Oppdagelser:**
-- Det er en web app, ikke desktop
-- WebSocket overhead er reell
-- Automatisk testing er nesten umulig
-- Qt ville vært bedre for ytelse
+**Discoveries:**
+- It is a web app, not desktop
+- WebSocket overhead is real
+- Automatic testing is almost impossible
+- Qt would have been better for performance
 
-**Men:** EventBus gjør NiceGUI brukbar.
+**But:** EventBus makes NiceGUI usable.
 
-**Leksjon:** Velg riktig framework fra start. NiceGUI ok for prototyper, Qt for produksjon.
+**Lesson:** Choose the right framework from the start. NiceGUI ok for prototypes, Qt for production.
 
 ---
 
@@ -451,7 +451,7 @@ first_page = get_trade_history(limit=50, offset=0)
 
 ### Performance KPIs
 
-| Metrikk | Mål | Oppnådd | Status |
+| Metric | Goal | Achieved | Status |
 |---------|-----|---------|--------|
 | CPU < 20% (idle) | <20% | 15% | ✅ |
 | Update latency < 200ms | <200ms | <100ms | ✅ |
@@ -460,42 +460,42 @@ first_page = get_trade_history(limit=50, offset=0)
 
 ### Code Quality KPIs
 
-| Metrikk | Mål | Oppnådd | Status |
+| Metric | Goal | Achieved | Status |
 |---------|-----|---------|--------|
 | Test coverage | >80% | 90%* | ✅ |
 | Type hints | All funcs | EventBus only | ⚠️ |
 | Documentation | All comp | EventBus only | ⚠️ |
 
-*For EventBus og StateManager
+*For EventBus and StateManager
 
 ---
 
-## 🏆 Konklusjon
+## 🏆 Conclusion
 
-**Week 1 var en suksess!**
+**Week 1 was a success!**
 
-### Hva Vi Oppnådde
+### What We Achieved
 
-✅ **81% CPU-reduksjon** (80% → 15%)
-✅ **200x raskere updates** (2-10s → <100ms)
-✅ **95% raskere initial load** for store datasett
-✅ **3 timers eliminert** (dashboard, positions, history)
-✅ **Event-driven arkitektur** implementert
+✅ **81% CPU reduction** (80% → 15%)
+✅ **200x faster updates** (2-10s → <100ms)
+✅ **95% faster initial load** for large datasets
+✅ **3 timers eliminated** (dashboard, positions, history)
+✅ **Event-driven architecture** implemented
 ✅ **Comprehensive tests** for EventBus
-✅ **Full dokumentasjon** (3 guide-filer)
+✅ **Full documentation** (3 guide files)
 
-### Hva Er Neste
+### What Is Next
 
 🔄 **Week 2:** Caching + Log optimization
 🏗️ **Week 3:** Dependency injection + UI state
 🔵 **Week 4:** Virtual scrolling + debouncing
 
-### Skal Vi Fortsette med NiceGUI?
+### Should We Continue with NiceGUI?
 
-**Ja, for nå:**
-- EventBus gir 80% av forbedringene
-- Kan fullføre optimaliseringer
-- Vurdér Qt-migrering etter Week 2-3
+**Yes, for now:**
+- EventBus provides 80% of the improvements
+- Can complete optimizations
+- Consider Qt migration after Week 2-3
 
 ---
 

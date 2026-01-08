@@ -658,7 +658,7 @@ class TradingBotEngine:
         self.state.balance = float(user_state.get('balance', 0.0))
         self.state.total_value = float(user_state.get('total_value', 0.0))
         
-        initial = 10000.0 # TODO: Config
+        initial = float(CONFIG.get('paper_trading_starting_balance', 10000.0))
         if initial > 0:
             self.state.total_return_pct = ((self.state.total_value - initial) / initial) * 100
         

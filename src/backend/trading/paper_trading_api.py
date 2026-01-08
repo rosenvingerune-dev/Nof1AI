@@ -616,7 +616,19 @@ class PaperTradingAPI:
                 "notional_entry": pos.notional,
             })
 
-        total_value = self.balance + total_unrealized_pnl
+        # Calculate Total Equity
+        # For Paper Trading (Spot-like model):
+        # Long:  Equity = Cash Balance + (Size * Current Price)
+        # Short: Equity = Cash Balance - (|Size| * Current Price) (Since cash increased on sell)
+        # Unified: Equity = Cash Balance + (Size * Current Price)
+        
+        position_equity = 0.0
+        for p in enriched_positions:
+            # pos.size is signed (+ for Long, - for Short)
+            # enriched_positions stores quantity as signed size
+            position_equity += (p["quantity"] * p["current_price"])
+
+        total_value = self.balance + position_equity
 
         return {
             "balance": self.balance,

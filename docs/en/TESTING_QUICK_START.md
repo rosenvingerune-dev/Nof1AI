@@ -1,57 +1,57 @@
 # 🚀 Testing Quick Start
 
-Rask guide for å verifisere at Gemini-integrasjonen fungerer.
+Fast guide to verify that the Gemini integration is working.
 
 ---
 
-## ⚡ TL;DR - Kom i gang på 5 minutter
+## ⚡ TL;DR - Get started in 5 minutes
 
 ```bash
-# 1. Installer dependencies
+# 1. Install dependencies
 pip install -r requirements.txt
 
-# 2. Lag .env fil
+# 2. Create .env file
 copy .env.example .env
 
-# 3. Rediger .env med dine API keys
+# 3. Edit .env with your API keys
 notepad .env
 
-# 4. Kjør alle tester
+# 4. Run all tests
 python tests/test_all.py
 ```
 
-Hvis alt er grønt ✅ → Du er klar til å trade!
+If everything is green ✅ → You are ready to trade!
 
 ---
 
-## 📋 Før du starter
+## 📋 Before you start
 
-### Du trenger:
+### You need:
 
 - [ ] **Gemini API Key**
-  - Få gratis key: https://makersuite.google.com/app/apikey
-  - Kopiér API-nøkkelen (starter med `AIzaSy...`)
+  - Get free key: https://makersuite.google.com/app/apikey
+  - Copy the API key (starts with `AIzaSy...`)
 
 - [ ] **Hyperliquid Testnet Wallet**
-  - Generer ny Ethereum private key
-  - Få testnet tokens fra Discord
+  - Generate new Ethereum private key
+  - Get testnet tokens from Discord
   - Discord: https://discord.gg/hyperliquid
 
-- [ ] **TAAPI Key** (valgfri)
-  - Gratis tier: https://taapi.io
-  - Nødvendig for tool calling test
+- [ ] **TAAPI Key** (optional)
+  - Free tier: https://taapi.io
+  - Required for tool calling test
 
 ---
 
-## 🔧 Steg-for-steg Setup
+## 🔧 Step-by-Step Setup
 
-### Steg 1: Generer Ethereum Wallet (for Hyperliquid testnet)
+### Step 1: Generate Ethereum Wallet (for Hyperliquid testnet)
 
-**Metode A: Python script**
+**Method A: Python script**
 ```python
 from eth_account import Account
 
-# Generer ny wallet
+# Generate new wallet
 account = Account.create()
 
 print("=" * 60)
@@ -59,33 +59,33 @@ print("HYPERLIQUID TESTNET WALLET")
 print("=" * 60)
 print(f"Address: {account.address}")
 print(f"Private Key: {account.key.hex()}")
-print("\n⚠️  LAGRE PRIVATE KEY TRYGT!")
+print("\n⚠️  STORE PRIVATE KEY SAFELY!")
 print("=" * 60)
 ```
 
-**Metode B: Bruk eksisterende wallet**
-- Bruk MetaMask eller annen Ethereum wallet
-- **VIKTIG:** Bruk KUN testnet wallet, aldri main wallet!
+**Method B: Use existing wallet**
+- Use MetaMask or other Ethereum wallet
+- **IMPORTANT:** Use ONLY testnet wallet, never main wallet!
 
-### Steg 2: Få Testnet Tokens
+### Step 2: Get Testnet Tokens
 
 1. Join Hyperliquid Discord: https://discord.gg/hyperliquid
-2. Gå til `#testnet-faucet` kanal
-3. Send kommando:
+2. Go to `#testnet-faucet` channel
+3. Send command:
    ```
    !faucet YOUR_WALLET_ADDRESS
    ```
-4. Vent ~30 sekunder
-5. Du mottar 10,000 USDC testnet tokens
+4. Wait ~30 seconds
+5. You receive 10,000 USDC testnet tokens
 
-### Steg 3: Konfigurer .env
+### Step 3: Configure .env
 
-**Kopier template:**
+**Copy template:**
 ```bash
 copy .env.example .env
 ```
 
-**Minimal konfigurasjon (.env):**
+**Minimal configuration (.env):**
 ```env
 # LLM Provider
 LLM_PROVIDER=gemini
@@ -104,30 +104,30 @@ INTERVAL=5m
 TRADING_MODE=manual
 ```
 
-**Erstatt:**
-- `AIzaSy_YOUR_KEY_HERE` → Din Gemini API key
-- `0xYOUR_PRIVATE_KEY_HERE` → Din testnet private key
+**Replace:**
+- `AIzaSy_YOUR_KEY_HERE` → Your Gemini API key
+- `0xYOUR_PRIVATE_KEY_HERE` → Your testnet private key
 
-### Steg 4: Kjør Tester
+### Step 4: Run Tests
 
-**Alle tester (anbefalt):**
+**All tests (recommended):**
 ```bash
 python tests/test_all.py
 ```
 
-**Eller individuelt:**
+**Or individually:**
 ```bash
-python tests/test_01_environment.py      # ~5 sek
-python tests/test_02_gemini_api.py       # ~15 sek
-python tests/test_03_hyperliquid_api.py  # ~10 sek
-python tests/test_04_gemini_trading_agent.py  # ~30 sek
+python tests/test_01_environment.py      # ~5 sec
+python tests/test_02_gemini_api.py       # ~15 sec
+python tests/test_03_hyperliquid_api.py  # ~10 sec
+python tests/test_04_gemini_trading_agent.py  # ~30 sec
 ```
 
 ---
 
-## ✅ Forventet Output
+## ✅ Expected Output
 
-### Hvis alt fungerer:
+### If everything works:
 
 ```
 🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀
@@ -144,19 +144,19 @@ TEST 1: Environment Configuration
 ✓ LLM Provider: gemini
 
 --- Gemini Configuration ---
-✓ API Key: AIzaSy...abc4 (skjult)
+✓ API Key: AIzaSy...abc4 (hidden)
 ✓ Model: gemini-2.0-flash-exp
 
 --- Hyperliquid Configuration ---
 ✓ Network: testnet
 ✓ Using TESTNET (safe for learning)
-✓ Private Key: 0xabc1...def9 (skjult)
+✓ Private Key: 0xabc1...def9 (hidden)
 
 --- Trading Configuration ---
 ✓ Assets: BTC,ETH
 ✓ Interval: 5m
 ✓ Trading Mode: manual
-✓ MANUAL mode aktivert - trades krever godkjenning
+✓ MANUAL mode activated - trades require approval
 
 ====================================================================
 TEST SUMMARY
@@ -197,163 +197,163 @@ Your nof1.ai setup with Gemini is fully configured!
 
 ---
 
-## ❌ Vanlige Feil & Løsninger
+## ❌ Common Errors & Solutions
 
 ### ❌ "GEMINI_API_KEY not found"
 
-**Problem:** .env fil mangler eller ikke lastet
+**Problem:** .env file missing or not loaded
 
-**Løsning:**
+**Solution:**
 ```bash
-# Sjekk at .env eksisterer
+# Check that .env exists
 dir .env
 
-# Åpne og verifiser innhold
+# Open and verify content
 notepad .env
 
-# Restart terminal etter .env endringer
+# Restart terminal after .env changes
 ```
 
 ### ❌ "Invalid API key"
 
-**Problem:** Feil API key eller utgått
+**Problem:** Wrong API key or expired
 
-**Løsning:**
-1. Gå til https://makersuite.google.com/app/apikey
-2. Lag ny API key
-3. Oppdater GEMINI_API_KEY i .env
-4. Kjør test på nytt
+**Solution:**
+1. Go to https://makersuite.google.com/app/apikey
+2. Create new API key
+3. Update GEMINI_API_KEY in .env
+4. Run test again
 
 ### ❌ "Hyperliquid balance is 0"
 
-**Problem:** Ingen testnet tokens
+**Problem:** No testnet tokens
 
-**Løsning:**
+**Solution:**
 ```bash
 # 1. Join Discord
 https://discord.gg/hyperliquid
 
-# 2. I #testnet-faucet kanal:
+# 2. In #testnet-faucet channel:
 !faucet YOUR_ADDRESS
 
-# 3. Verifiser at du fikk tokens:
+# 3. Verify that you received tokens:
 python tests/test_03_hyperliquid_api.py
 ```
 
 ### ❌ "ModuleNotFoundError: No module named 'google.generativeai'"
 
-**Problem:** Gemini SDK ikke installert
+**Problem:** Gemini SDK not installed
 
-**Løsning:**
+**Solution:**
 ```bash
 pip install google-generativeai>=0.8.0
 ```
 
 ### ❌ "Rate limit exceeded"
 
-**Problem:** For mange API-kall
+**Problem:** Too many API calls
 
-**Løsning:**
-- Vent 60 sekunder
-- Gemini free tier: 60 requests/minutt
-- Kjør tester saktere (én om gangen)
+**Solution:**
+- Wait 60 seconds
+- Gemini free tier: 60 requests/minute
+- Run tests slower (one by one)
 
 ---
 
 ## 🎯 Test Breakdown
 
-### Test 1: Environment (5 sekunder)
-**Hva den gjør:**
-- Sjekker at .env fil er riktig konfigurert
-- Verifiserer API keys er satt
-- Validerer trading konfigurasjon
+### Test 1: Environment (5 seconds)
+**What it does:**
+- Checks that .env file is correctly configured
+- Verifies API keys are set
+- Validates trading configuration
 
-**Kan feile hvis:**
-- .env mangler
-- API keys er placeholders
-- Trading mode er ikke satt
+**Fail conditions:**
+- .env missing
+- API keys are placeholders
+- Trading mode is not set
 
-### Test 2: Gemini API (15 sekunder)
-**Hva den gjør:**
-- Tester Gemini API tilkobling
-- Verifiserer JSON structured output
-- Tester function calling
+### Test 2: Gemini API (15 seconds)
+**What it does:**
+- Tests Gemini API connection
+- Verifies JSON structured output
+- Tests function calling
 
-**Kan feile hvis:**
-- GEMINI_API_KEY er ugyldig
-- Internett-tilkobling feiler
-- API quota er oppbrukt
+**Fail conditions:**
+- GEMINI_API_KEY is invalid
+- Internet connection fails
+- API quota exhausted
 
-### Test 3: Hyperliquid API (10 sekunder)
-**Hva den gjør:**
-- Tester exchange API tilkobling
-- Henter account balance
-- Henter markedspriser
+### Test 3: Hyperliquid API (10 seconds)
+**What it does:**
+- Tests exchange API connection
+- Fetches account balance
+- Fetches market prices
 
-**Kan feile hvis:**
-- Private key er feil
-- Testnet er nede
-- Ingen testnet funds
+**Fail conditions:**
+- Private key is wrong
+- Testnet is down
+- No testnet funds
 
-### Test 4: Trading Agent (30 sekunder)
-**Hva den gjør:**
-- Tester full trading decision flow
-- Verifiserer AI reasoning
-- Tester tool calling (hvis TAAPI)
+### Test 4: Trading Agent (30 seconds)
+**What it does:**
+- Tests full trading decision flow
+- Verifies AI reasoning
+- Tests tool calling (if TAAPI)
 
-**Kan feile hvis:**
-- Test 1-3 feiler
-- Gemini returnerer ugyldig JSON
-- System prompt er for restriktiv
+**Fail conditions:**
+- Tests 1-3 fail
+- Gemini returns invalid JSON
+- System prompt is too restrictive
 
 ---
 
-## 🔄 Hva skjer etter testene?
+## 🔄 What happens after tests?
 
-### ✅ Hvis alle tester passerer:
+### ✅ If all tests pass:
 
-**Du er klar til å starte bot:**
+**You are ready to start bot:**
 ```bash
 python main.py
 ```
 
-**GUI åpner på:** http://localhost:3000
+**GUI opens at:** http://localhost:3000
 
-**Første gang du kjører:**
-1. Bot starter i background
-2. Venter til første 5-minutt interval
-3. Henter markedsdata
-4. Sender til Gemini for analyse
-5. Viser trade forslag i GUI
-6. I manual mode: Du godkjenner via "Recommendations" page
+**First time running:**
+1. Bot starts in background
+2. Waits until first 5-minute interval
+3. Fetches market data
+4. Sends to Gemini for analysis
+5. Shows trade proposals in GUI
+6. In manual mode: You approve via "Recommendations" page
 
-### ❌ Hvis noen tester feiler:
+### ❌ If any tests fail:
 
-**Ikke start bot ennå!**
+**Do not start bot yet!**
 
-1. Les feilmeldingen nøye
-2. Fix problemet (se "Vanlige Feil" over)
-3. Kjør testen på nytt
-4. Når alle er grønne → Start bot
+1. Read error message carefully
+2. Fix problem (see "Common Errors" above)
+3. Run test again
+4. When all are green → Start bot
 
 ---
 
-## 📚 Videre Lesing
+## 📚 Further Reading
 
-- **GEMINI_SETUP.md** - Detaljert Gemini guide
-- **tests/README.md** - Full test dokumentasjon
-- **nof1AI_review.md** - Prosjektanalyse
-- **.env.example** - Alle konfigurasjonsmuligheter
+- **GEMINI_SETUP.md** - Detailed Gemini guide
+- **tests/README.md** - Full test documentation
+- **REVIEW_AND_ANALYSIS.md** - Project analysis
+- **.env.example** - All configuration options
 
 ---
 
 ## 💡 Pro Tips
 
-### Spar tid:
+### Save time:
 
 ```bash
-# Kjør kun tester som er relevante
-python tests/test_02_gemini_api.py  # Kun Gemini
+# Run only relevant tests
+python tests/test_02_gemini_api.py  # Only Gemini
 
 # Debugging: Enable verbose output
 python -v tests/test_all.py
@@ -362,36 +362,36 @@ python -v tests/test_all.py
 ### Logging:
 
 ```bash
-# Se Gemini API requests
+# See Gemini API requests
 type llm_requests.log
 
-# Se bot activity
+# See bot activity
 type bot.log
 
 # Live monitoring (PowerShell)
 Get-Content llm_requests.log -Wait
 
-# ELLER (Anbefalt):
-# Bruk "Logs" siden i Web GUI under "SYSTEM" menyen!
+# OR (Recommended):
+# Use "Logs" page in Web GUI under "SYSTEM" menu!
 ```
 
 ### Performance:
 
-- Gemini 2.0 Flash: Gratis, rask (~1s response)
-- Gemini 1.5 Pro: Betalt, bedre kvalitet (~2s response)
-- Start med Flash, oppgrader hvis nødvendig
+- Gemini 2.0 Flash: Free, fast (~1s response)
+- Gemini 1.5 Pro: Paid, better quality (~2s response)
+- Start with Flash, upgrade if necessary
 
 ---
 
-## 🆘 Trenger hjelp?
+## 🆘 Need help?
 
-### Ressurser:
+### Resources:
 
-1. **Dokumentasjon**
-   - Les GEMINI_SETUP.md
-   - Sjekk tests/README.md
+1. **Documentation**
+   - Read GEMINI_SETUP.md
+   - Check tests/README.md
 
-2. **Log filer**
+2. **Log files**
    - llm_requests.log (Gemini errors)
    - bot.log (General errors)
 
@@ -401,15 +401,15 @@ Get-Content llm_requests.log -Wait
 
 ### Debugging checklist:
 
-- [ ] .env fil eksisterer og er riktig formatert
-- [ ] API keys er gyldige (ikke placeholders)
-- [ ] Python 3.10+ installert
-- [ ] Dependencies installert (requirements.txt)
-- [ ] Internett-tilkobling fungerer
-- [ ] Testnet wallet har funds (hvis testnet)
+- [ ] .env file exists and is correctly formatted
+- [ ] API keys are valid (not placeholders)
+- [ ] Python 3.10+ installed
+- [ ] Dependencies installed (requirements.txt)
+- [ ] Internet connection working
+- [ ] Testnet wallet has funds (if testnet)
 
 ---
 
-**Lykke til! 🚀**
+**Good luck! 🚀**
 
-*Start med test_all.py og følg instruksjonene. Du er klar på 5 minutter!*
+*Start with test_all.py and follow instructions. You are ready in 5 minutes!*
