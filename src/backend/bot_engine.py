@@ -182,6 +182,7 @@ class TradingBotEngine:
 
                 try:
                     # ===== PHASE 1 & 2: Fetch Account State & Positions =====
+                    self.logger.info("Phase 1: Fetching user state...")
                     state = await self.exchange.get_user_state()
                     await self._update_bot_account_state(state)
 
@@ -305,6 +306,7 @@ class TradingBotEngine:
                             try:
                                 # Fetch history and calculate indicators locally
                                 # No rate limits needed!
+                                self.logger.debug(f"Calculating indicators for {asset}...")
                                 indicators = await self.indicators.fetch_and_calculate_all(self.exchange, asset)
                             except Exception as e:
                                 self.logger.error(f"Error gathering local indicators for {asset}: {e}")
@@ -412,6 +414,7 @@ class TradingBotEngine:
                         f.write(context + "\n")
 
                     # ===== PHASE 10: Get LLM Decision =====
+                    self.logger.info("Phase 10: Calling LLM decision...")
                     decisions = await asyncio.to_thread(
                         self.agent.decide_trade, self.assets, context
                     )
@@ -636,10 +639,11 @@ class TradingBotEngine:
                     self._notify_state_update()
 
                 except Exception as e:
-                    self.logger.error(f"Error in main loop iteration: {e}", exc_info=True)
-                    self.state.error = str(e)
+                    error_msg = str(e)
+                    self.logger.error(f"Error in main loop iteration: {error_msg} (Type: {type(e).__name__})", exc_info=True)
+                    self.state.error = error_msg if error_msg else f"Unknown Error ({type(e).__name__})"
                     if self.on_error:
-                        self.on_error(str(e))
+                        self.on_error(self.state.error)
 
                 # ===== PHASE 12: Sleep Until Next Interval =====
                 await asyncio.sleep(self._get_interval_seconds())

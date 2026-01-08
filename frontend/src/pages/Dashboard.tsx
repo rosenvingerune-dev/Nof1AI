@@ -125,7 +125,10 @@ export function DashboardPage() {
                                             <tr key={pos.symbol} className="hover:bg-muted/10 transition-colors">
                                                 <td className="px-4 py-3 font-bold text-white">{pos.symbol}</td>
                                                 <td className="px-4 py-3 text-right text-gray-300 font-mono text-xs">
-                                                    ${pos.entry_price} <span className="text-muted-foreground mx-1">|</span> x{pos.quantity}
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span>${Number(pos.entry_price).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                                        <span className="text-muted-foreground text-xs">Qty: {Number(pos.quantity).toFixed(4)}</span>
+                                                    </div>
                                                 </td>
                                                 <td className={cn("px-4 py-3 text-right font-mono font-bold", pos.unrealized_pnl >= 0 ? "text-green-500" : "text-red-500")}>
                                                     {pos.unrealized_pnl >= 0 ? "+" : ""}${pos.unrealized_pnl.toFixed(2)}
@@ -153,7 +156,7 @@ export function DashboardPage() {
                                     year: 'numeric',
                                     hour: '2-digit',
                                     minute: '2-digit'
-                                }) : "Never"}
+                                }) : "Initializing..."}
                             </span>
                         </div>
                         <div className="flex justify-between items-center text-sm">
@@ -161,8 +164,8 @@ export function DashboardPage() {
                             <span className="font-mono bg-muted px-2 py-1 rounded text-xs">{botState.invocation_count}</span>
                         </div>
                         {botState.error && (
-                            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20">
-                                Error: {botState.error}
+                            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md border border-destructive/20 break-all">
+                                <strong>Error:</strong> {typeof botState.error === 'object' ? JSON.stringify(botState.error) : String(botState.error)}
                             </div>
                         )}
                         <div className="pt-4 border-t">
