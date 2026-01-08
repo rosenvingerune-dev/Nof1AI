@@ -77,7 +77,7 @@ export function MarketPage() {
                                     </div>
                                 </div>
                                 <CardDescription className="text-2xl font-mono text-foreground font-semibold">
-                                    ${data.current_price.toLocaleString()}
+                                    ${data.current_price.toLocaleString(undefined, { maximumFractionDigits: data.current_price > 10 ? 0 : 2 })}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
@@ -122,7 +122,7 @@ export function MarketPage() {
                                     <div className="flex items-center justify-between mt-2">
                                         <span className="text-sm font-medium text-muted-foreground pl-6">EMA (20)</span>
                                         <span className="font-mono text-sm text-foreground">
-                                            ${data.intraday?.ema20?.toFixed(2) || "N/A"}
+                                            ${data.intraday?.ema20?.toLocaleString(undefined, { maximumFractionDigits: (data.intraday?.ema20 || 0) > 10 ? 0 : 2 }) || "N/A"}
                                         </span>
                                     </div>
                                 </div>
