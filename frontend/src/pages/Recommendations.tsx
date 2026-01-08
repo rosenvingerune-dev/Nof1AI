@@ -12,6 +12,7 @@ export function RecommendationsPage() {
     const {
         proposals,
         botState,
+        settings,
         fetchProposals,
         approveProposal,
         rejectProposal,
@@ -32,6 +33,37 @@ export function RecommendationsPage() {
         await rejectProposal(id, "Manually rejected via UI");
     };
 
+    const getModeInfo = () => {
+        if (!settings) return null;
+        if (settings.trading_mode === 'manual') {
+            return {
+                title: "Bot Halted (Manual Mode)",
+                desc: "The bot is currently halted. Switch to Assistant or Autonomous mode in Settings to generate proposals.",
+                colorClass: "bg-gray-100 dark:bg-gray-900/50 border-gray-400 text-gray-800 dark:text-gray-300",
+                iconClass: "text-gray-500"
+            };
+        }
+        if (settings.trading_mode === 'auto' && !settings.auto_trade_enabled) {
+            return {
+                title: "Manual Approval Required (Assistant Mode)",
+                desc: "The bot will analyze the market and generate trade proposals, but will not execute them until you explicitly approve them here.",
+                colorClass: "bg-blue-50/50 dark:bg-blue-900/20 border-blue-500 text-blue-800 dark:text-blue-200",
+                iconClass: "text-blue-400"
+            };
+        }
+        if (settings.trading_mode === 'auto' && settings.auto_trade_enabled) {
+            return {
+                title: "Fully Autonomous Trading",
+                desc: `The bot will automatically execute trades with confidence > ${settings.auto_trade_threshold ?? 80}%. Lower confidence trades may still appear here for review.`,
+                colorClass: "bg-green-50/50 dark:bg-green-900/20 border-green-500 text-green-800 dark:text-green-200",
+                iconClass: "text-green-500"
+            };
+        }
+        return null;
+    };
+
+    const modeInfo = getModeInfo();
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -46,28 +78,27 @@ export function RecommendationsPage() {
                             ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                             : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
                     )}>
-                        {botState?.is_running ? "Bot Active" : "Bot Stopped"}
+                        {botState?.is_running ? "Engine Running" : "Engine Stopped"}
                     </span>
                 </div>
             </div>
 
-            {/* Info Banner */}
-            <div className="bg-blue-50/50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-r-md">
-                <div className="flex">
-                    <div className="flex-shrink-0">
-                        <Info className="h-5 w-5 text-blue-400" aria-hidden="true" />
-                    </div>
-                    <div className="ml-3">
-                        <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">Manual Approval Required</h3>
-                        <div className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-                            <p>
-                                The bot is currently in semi-autonomous mode. It will analyze the market and generate trade proposals,
-                                but will not execute them until you explicitly approve them here.
-                            </p>
+            {/* Mode Info Banner */}
+            {modeInfo && (
+                <div className={cn("border-l-4 p-4 rounded-r-md", modeInfo.colorClass)}>
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <Info className={cn("h-5 w-5", modeInfo.iconClass)} aria-hidden="true" />
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-medium">{modeInfo.title}</h3>
+                            <div className="mt-2 text-sm opacity-90">
+                                <p>{modeInfo.desc}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
 
 
 

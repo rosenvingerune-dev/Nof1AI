@@ -401,6 +401,7 @@ class TradingBotEngine:
                         ("market_data", market_sections),
                         ("instructions", {
                             "assets": self.assets,
+                            "max_position_size": float(CONFIG.get("max_position_size", 1000)),
                             "note": "Follow the system prompt guidelines strictly"
                         })
                     ])

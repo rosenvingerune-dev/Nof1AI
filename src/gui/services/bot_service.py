@@ -223,21 +223,95 @@ class BotService:
             self.logger.error(f"Failed to close position: {e}")
             return False
 
-    def update_config(self, config: Dict):
+    async def update_config(self, config: Dict) -> bool:
         """
         Update bot configuration.
-
-        Args:
-            config: Dict with 'assets', 'interval', 'model' keys
         """
-        if 'assets' in config:
-            self.config['assets'] = config['assets']
-        if 'interval' in config:
-            self.config['interval'] = config['interval']
-        if 'model' in config:
-            self.config['model'] = config['model']
+        try:
+            # Update in-memory CONFIG
+            from src.backend.config_loader import CONFIG
+            
+            # Map frontend keys to backend CONFIG keys
+            mappings = {
+                'assets': 'assets',
+                'interval': 'interval',
+                'llm_model': 'llm_model',
+                'trading_mode': 'trading_mode',
+                'max_position_size': 'max_position_size',
+                'auto_trade_enabled': 'auto_trade_enabled',
+                'auto_trade_threshold': 'auto_trade_threshold',
+            }
 
-        self.logger.info(f"Configuration updated: {self.config}")
+            env_updates = {}
+
+            for key, val in config.items():
+                if key in mappings:
+                    cfg_key = mappings[key]
+                    
+                    # Handle assets list -> string conversion
+                    if key == 'assets' and isinstance(val, list):
+                        val_str = ",".join(val)
+                        CONFIG[cfg_key] = val_str
+                        env_updates['ASSETS'] = val_str
+                    else:
+                        CONFIG[cfg_key] = val
+                        env_updates[cfg_key.upper()] = str(val)
+
+            # Update running engine if exists
+            if self.bot_engine:
+                # Force reload assets if changed
+                if 'assets' in config:
+                    raw_assets = CONFIG.get('assets', "")
+                    if isinstance(raw_assets, list): 
+                        self.bot_engine.assets = raw_assets
+                    else:
+                        self.bot_engine.assets = [a.strip() for a in raw_assets.split(',') if a.strip()]
+                
+                # Other config is read dynamically by checks in _execute_decisions 
+                # (e.g. CONFIG.get('max_position_size'))
+
+            # Persist to .env
+            self._save_to_env(env_updates)
+            
+            self.logger.info(f"Configuration updated: {config}")
+            return True
+        except Exception as e:
+            self.logger.error(f"Failed to update config: {e}")
+            return False
+
+    def _save_to_env(self, updates: Dict[str, str]):
+        """Helper to update .env file"""
+        from pathlib import Path
+        env_path = Path(".env")
+        if not env_path.exists():
+            return
+
+        try:
+            content = env_path.read_text("utf-8")
+            lines = content.splitlines()
+            new_lines = []
+            updated_keys = set()
+
+            for line in lines:
+                line_stripped = line.strip()
+                if "=" in line_stripped and not line_stripped.startswith("#"):
+                    key = line_stripped.split("=")[0].strip()
+                    if key in updates:
+                        new_lines.append(f"{key}={updates[key]}")
+                        updated_keys.add(key)
+                        continue
+                new_lines.append(line)
+            
+            # Append new keys that weren't in the file
+            for key, val in updates.items():
+                if key not in updated_keys:
+                    new_lines.append(f"{key}={val}")
+
+            # Join with newlines and ensure trailing newline
+            new_content = "\n".join(new_lines) + "\n"
+            env_path.write_text(new_content, "utf-8")
+        except Exception as e:
+            self.logger.error(f"Failed to write .env file: {e}")
 
     def get_assets(self) -> List[str]:
         """Get configured assets list"""
