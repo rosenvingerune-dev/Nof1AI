@@ -100,15 +100,15 @@ class GeminiTradingAgent:
                         "See https://taapi.io/indicators/ for full list and parameters."
                     ),
                     parameters=types.Schema(
-                        type=types.Type.OBJECT,
+                        type="OBJECT",
                         properties={
-                            "indicator": types.Schema(type=types.Type.STRING),
-                            "symbol": types.Schema(type=types.Type.STRING),
-                            "interval": types.Schema(type=types.Type.STRING),
-                            "period": types.Schema(type=types.Type.INTEGER),
-                            "backtrack": types.Schema(type=types.Type.INTEGER),
+                            "indicator": types.Schema(type="STRING"),
+                            "symbol": types.Schema(type="STRING"),
+                            "interval": types.Schema(type="STRING"),
+                            "period": types.Schema(type="INTEGER"),
+                            "backtrack": types.Schema(type="INTEGER"),
                             "other_params": types.Schema(
-                                type=types.Type.OBJECT,
+                                type="OBJECT",
                                 properties={}
                             ),
                         },

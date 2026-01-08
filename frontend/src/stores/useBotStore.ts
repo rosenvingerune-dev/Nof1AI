@@ -14,6 +14,7 @@ interface BotStore {
 
     // Actions
     fetchInitialState: () => Promise<void>;
+    pollStatus: () => Promise<void>;
     updateBotState: (newState: Partial<BotState>) => void;
     setConnected: (connected: boolean) => void;
 
@@ -51,6 +52,17 @@ export const useBotStore = create<BotStore>((set, get) => ({
         }
     },
 
+    pollStatus: async () => {
+        // Silent update - do not set isLoading
+        try {
+            const state = await BotAPI.getStatus();
+            set({ botState: state });
+        } catch (err) {
+            // Be silent on poll errors to avoid popup spam, just log
+            console.error("Poll connection failed", err);
+        }
+    },
+
     updateBotState: (newState) => {
         set((state) => ({
             botState: state.botState ? { ...state.botState, ...newState } : (newState as BotState)
@@ -70,7 +82,8 @@ export const useBotStore = create<BotStore>((set, get) => ({
                 // Fallback default
                 await BotAPI.startBot({ assets: ["BTC", "ETH"], interval: "1h" });
             }
-            // State update will come via WebSocket
+            // State update will come via WebSocket, but fetch immediately to be responsive
+            await get().fetchInitialState();
         } catch (err: any) {
             set({ error: err.message || "Failed to start bot" });
         } finally {
@@ -82,6 +95,7 @@ export const useBotStore = create<BotStore>((set, get) => ({
         set({ isLoading: true });
         try {
             await BotAPI.stopBot();
+            await get().fetchInitialState();
         } catch (err: any) {
             set({ error: err.message || "Failed to stop bot" });
         } finally {

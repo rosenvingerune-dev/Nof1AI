@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useBotStore } from "@/stores/useBotStore";
 import {
     Card,
@@ -9,7 +10,14 @@ import { cn } from "@/lib/utils";
 import { InfoCard } from "@/components/InfoCard";
 
 export function DashboardPage() {
-    const { botState, startBot, stopBot, isLoading, error, fetchInitialState } = useBotStore();
+    const { botState, startBot, stopBot, isLoading, error, fetchInitialState, pollStatus } = useBotStore();
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            pollStatus();
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [pollStatus]);
 
     if (!botState) {
         if (error) {
