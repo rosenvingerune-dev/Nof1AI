@@ -71,8 +71,6 @@ export function RecommendationsPage() {
 
 
 
-            // ... (inside component)
-
             {/* Stats Row */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InfoCard
@@ -138,7 +136,7 @@ export function RecommendationsPage() {
                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="p-3 bg-muted/30 rounded-lg">
                                                 <div className="text-xs text-muted-foreground mb-1">Entry Price</div>
-                                                <div className="text-lg font-mono font-semibold">${proposal.entry_price?.toLocaleString()}</div>
+                                                <div className="text-lg font-mono font-semibold">${proposal.entry_price?.toLocaleString(undefined, { maximumFractionDigits: (proposal.entry_price || 0) > 10 ? 0 : 2 })}</div>
                                             </div>
                                             <div className="p-3 bg-muted/30 rounded-lg">
                                                 <div className="text-xs text-muted-foreground mb-1">Size</div>
@@ -150,13 +148,13 @@ export function RecommendationsPage() {
                                             <div className="p-3 bg-green-500/10 rounded-lg border border-green-500/20">
                                                 <div className="text-xs text-green-600 dark:text-green-400 mb-1">Take Profit</div>
                                                 <div className="text-lg font-mono font-semibold text-green-700 dark:text-green-300">
-                                                    ${proposal.tp_price?.toLocaleString() || "N/A"}
+                                                    ${proposal.tp_price?.toLocaleString(undefined, { maximumFractionDigits: (proposal.tp_price || 0) > 10 ? 0 : 2 }) || "N/A"}
                                                 </div>
                                             </div>
                                             <div className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
                                                 <div className="text-xs text-red-600 dark:text-red-400 mb-1">Stop Loss</div>
                                                 <div className="text-lg font-mono font-semibold text-red-700 dark:text-red-300">
-                                                    ${proposal.sl_price?.toLocaleString() || "N/A"}
+                                                    ${proposal.sl_price?.toLocaleString(undefined, { maximumFractionDigits: (proposal.sl_price || 0) > 10 ? 0 : 2 }) || "N/A"}
                                                 </div>
                                             </div>
                                         </div>
