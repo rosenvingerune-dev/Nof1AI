@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useBotStore } from "@/stores/useBotStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -17,6 +18,7 @@ function InfoCard({ title, value, subtext, className }: { title: string, value: 
 
 export function PositionsPage() {
     const { botState, closePosition } = useBotStore();
+    const navigate = useNavigate();
 
     if (!botState) {
         return <div className="p-10 text-center">Loading positions...</div>;
@@ -138,7 +140,11 @@ export function PositionsPage() {
 
                                                 <td className="px-4 py-3 text-right">
                                                     <div className="flex justify-end gap-3">
-                                                        <button className="text-blue-500 hover:text-blue-400 transition-colors" title="View Chart">
+                                                        <button
+                                                            className="text-blue-500 hover:text-blue-400 transition-colors"
+                                                            title="View Chart"
+                                                            onClick={() => navigate('/market')}
+                                                        >
                                                             <LineChart className="h-4 w-4" />
                                                         </button>
                                                         <button
