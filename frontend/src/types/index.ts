@@ -21,6 +21,8 @@ export interface Position {
     liquidation_price?: number;
     unrealized_pnl: number;
     leverage: number;
+    tp_price?: number;
+    sl_price?: number;
 }
 
 export interface MarketData {
@@ -33,6 +35,7 @@ export interface MarketData {
     intraday?: {
         ema20?: number;
         rsi14?: number;
+        sentiment?: string;
     };
 }
 
@@ -52,4 +55,5 @@ export interface Settings {
     max_position_size?: number;
     auto_trade_enabled?: boolean;
     auto_trade_threshold?: number;
+    leverage?: number;
 }

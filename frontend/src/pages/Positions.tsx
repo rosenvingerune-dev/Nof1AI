@@ -86,6 +86,8 @@ export function PositionsPage() {
                                         <th className="px-4 py-3 font-medium text-right">Current Price</th>
                                         <th className="px-4 py-3 font-medium text-right">Unrealized PnL</th>
                                         <th className="px-4 py-3 font-medium text-right">PnL %</th>
+                                        <th className="px-4 py-3 font-medium text-right text-green-500/80">TP</th>
+                                        <th className="px-4 py-3 font-medium text-right text-red-500/80">SL</th>
                                         <th className="px-4 py-3 font-medium text-center">Leverage</th>
                                         <th className="px-4 py-3 font-medium text-right">Liq. Price</th>
                                         <th className="px-4 py-3 font-medium text-right">Actions</th>
@@ -121,6 +123,14 @@ export function PositionsPage() {
                                                 {/* PnL % */}
                                                 <td className={cn("px-4 py-3 text-right font-mono text-xs", pnlPercent >= 0 ? "text-green-500" : "text-red-500")}>
                                                     {pnlPercent >= 0 ? "+" : ""}{pnlPercent.toFixed(2)}%
+                                                </td>
+
+                                                {/* TP/SL */}
+                                                <td className="px-4 py-3 text-right font-mono text-xs text-gray-400">
+                                                    {pos.tp_price ? `$${pos.tp_price.toLocaleString(undefined, { maximumFractionDigits: pos.tp_price > 10 ? 0 : 2 })}` : "-"}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-xs text-gray-400">
+                                                    {pos.sl_price ? `$${pos.sl_price.toLocaleString(undefined, { maximumFractionDigits: pos.sl_price > 10 ? 0 : 2 })}` : "-"}
                                                 </td>
 
                                                 <td className="px-4 py-3 text-center text-gray-400 font-mono">{pos.leverage || 1}</td>

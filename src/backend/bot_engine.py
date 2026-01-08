@@ -670,10 +670,18 @@ class TradingBotEngine:
         # 2. Enrich Positions
         raw_positions = user_state.get('positions', [])
         enriched_positions = []
+        
+        # Map active trades for metadata (TP/SL)
+        active_trades_map = {t.get('asset'): t for t in self.active_trades}
+
         for pos in raw_positions:
             symbol = pos.get('coin')
             try:
                 current_price = await self.exchange.get_current_price(symbol)
+                
+                # Get metadata from active trades if available
+                trade_meta = active_trades_map.get(symbol, {})
+                
                 enriched_positions.append({
                     'symbol': symbol,
                     'quantity': float(pos.get('szi', 0) or 0),
@@ -681,7 +689,9 @@ class TradingBotEngine:
                     'current_price': current_price,
                     'liquidation_price': float(pos.get('liquidationPx', 0) or 0),
                     'unrealized_pnl': float(pos.get('pnl', 0.0) or 0.0),
-                    'leverage': pos.get('leverage', {}).get('value', 1) if isinstance(pos.get('leverage'), dict) else pos.get('leverage', 1)
+                    'leverage': pos.get('leverage', {}).get('value', 1) if isinstance(pos.get('leverage'), dict) else pos.get('leverage', 1),
+                    'tp_price': trade_meta.get('tp_price'),
+                    'sl_price': trade_meta.get('sl_price'),
                 })
             except Exception as e:
                 self.logger.error(f"Error enriching position for {symbol}: {e}")

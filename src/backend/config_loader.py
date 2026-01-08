@@ -114,6 +114,7 @@ CONFIG = {
     "assets": _get_env("ASSETS"),  # e.g., "BTC ETH SOL" or "BTC,ETH,SOL"
     "interval": _get_env("INTERVAL"),  # e.g., "5m", "1h"
     "trading_mode": _get_env("TRADING_MODE", "auto"),  # manual or auto
+    "leverage": _get_int("LEVERAGE", 1),
     # API server
     "api_host": _get_env("API_HOST", "0.0.0.0"),
     "api_port": _get_env("APP_PORT") or _get_env("API_PORT") or "3000",

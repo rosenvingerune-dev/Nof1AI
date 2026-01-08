@@ -240,6 +240,7 @@ class BotService:
                 'max_position_size': 'max_position_size',
                 'auto_trade_enabled': 'auto_trade_enabled',
                 'auto_trade_threshold': 'auto_trade_threshold',
+                'leverage': 'leverage',
             }
 
             env_updates = {}

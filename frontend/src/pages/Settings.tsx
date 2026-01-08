@@ -112,6 +112,21 @@ export function SettingsPage() {
                         <p className="text-sm text-muted-foreground">Maximum capital allocated per position (0 for no limit).</p>
                     </div>
 
+                    {/* Target Leverage */}
+                    <div className="space-y-2">
+                        <Label htmlFor="leverage">Target Leverage (x)</Label>
+                        <Input
+                            id="leverage"
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={formData.leverage || 1}
+                            onChange={(e) => setFormData({ ...formData, leverage: parseInt(e.target.value) || 1 })}
+                            placeholder="1"
+                        />
+                        <p className="text-sm text-muted-foreground">Leverage multiplier (e.g., 5 for 5x). Be careful!</p>
+                    </div>
+
                     {/* Operation Mode - Unified Control */}
                     <div className="space-y-3 pt-2">
                         <Label>Operation Mode</Label>
