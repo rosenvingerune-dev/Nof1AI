@@ -190,3 +190,12 @@ tests/test_04_gemini_trading_agent.py::test_multi_asset_decision
     warnings.warn(
 
 tests/test_04_gemini_trading_agent.py::test_error_handling
+  C:\Users\Rune\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.10_qbz5n2kfra8p0\LocalCache\local-packages\Python310\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but tests/test_04_gemini_trading_agent.py::test_error_handling returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED scripts/test_ws.py::test_ws - Failed: async def functions are not nati...
+================= 1 failed, 55 passed, 21 warnings in 31.83s ==================

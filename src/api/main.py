@@ -35,3 +35,8 @@ app.include_router(websocket.router, tags=["WebSocket"])
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "NOF1 Trading Bot API is running"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("src.api.main:app", host="0.0.0.0", port=8000, reload=True)

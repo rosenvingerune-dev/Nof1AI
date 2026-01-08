@@ -171,25 +171,24 @@ class GeminiTradingAgent:
 
         try:
             # First send
-            response = chat.send_message(
-                 message=full_prompt,
-                 config=types.GenerateContentConfig(
-                     response_mime_type="application/json",
-                     response_schema=response_schema
-                 )
-            )
+            try:
+                response = chat.send_message(
+                    message=full_prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=response_schema
+                    )
+                )
+            except Exception as e:
+                 logging.error(f"Failed to send initial message to Gemini: {e}")
+                 # Check explicitly for empty content or invalid input specific errors here if needed
+                 if "content" in str(e).lower() and "empty" in str(e).lower():
+                      logging.error("Gemini received empty content. Check context generation.")
+                 raise e
 
             max_turns = 10
             for turn in range(max_turns):
                 # Check for function calls
-                # In google-genai, parts usually contain function_call
-                # We iterate through candidates/parts to find it.
-                
-                # Note: The response object structure in google-genai is slightly different.
-                # response.candidates[0].content.parts[0].function_call
-                # But it simplifies access sometimes.
-                
-                # We'll use the safe navigation assuming strict structure
                 if not response.candidates:
                     break
                     
@@ -221,28 +220,43 @@ class GeminiTradingAgent:
                                 params=params,
                                 timeout=30
                             ).json()
-                            function_result = {"result": ind_resp}
+                            
+                            # Check for TAAPI errors
+                            if "error" in ind_resp:
+                                 logging.error(f"TAAPI Error: {ind_resp['error']}")
+                                 function_result = {"error": ind_resp['error']}
+                            else:
+                                 function_result = {"result": ind_resp}
+                                 
                         except Exception as ex:
+                            logging.error(f"TAAPI Request Exception: {ex}")
                             function_result = {"error": str(ex)}
 
                         # Send output back
-                        # google-genai expects a FunctionResponse part
-                        response = chat.send_message(
-                            message=types.Part.from_function_response(
-                                name="fetch_taapi_indicator",
-                                response=function_result
-                            ),
-                            config=types.GenerateContentConfig(
-                                response_mime_type="application/json",
-                                response_schema=response_schema
+                        try:
+                            response = chat.send_message(
+                                message=types.Part.from_function_response(
+                                    name="fetch_taapi_indicator",
+                                    response=function_result
+                                ),
+                                config=types.GenerateContentConfig(
+                                    response_mime_type="application/json",
+                                    response_schema=response_schema
+                                )
                             )
-                        )
+                        except Exception as e:
+                            logging.error(f"Gemini API error on turn {turn}: {e}")
+                            break # Break loop on API error
                         continue
                 
                 # If we get here, no function call -> Final result
                 break
 
             response_text = response.text
+            if not response_text:
+                 logging.warning("Gemini returned empty response text.")
+                 return self._fallback_response(assets, "Empty response from Gemini")
+                 
             logging.info(f"Gemini response received ({len(response_text)} chars)")
             
             with open("llm_requests.log", "a", encoding="utf-8") as f:
